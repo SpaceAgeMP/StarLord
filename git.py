@@ -13,6 +13,7 @@ class GitRepo:
     def _update(self):
         call(["git", "-C", self.folder, "remote", "set-url", "origin", self.repo])
         call(["git", "-C", self.folder, "pull"])
+        # TODO: Return if this actually updated, and not True all the time
         return True
 
     def update(self):
