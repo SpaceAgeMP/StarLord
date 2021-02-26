@@ -7,8 +7,6 @@ from time import sleep
 from threading import Thread
 from sys import stdin
 
-keepUpLock = 0
-
 config = load("spaceage_forlorn")
 server = ServerProcess(".", config.server)
 
@@ -55,20 +53,21 @@ cleanupFolders()
 server.run()
 
 def updateChecker():
-    global keepUpLock
     print("Checking for updates...")
-    keepUpLock += 1
     hasUpdates = checkUpdates()
     if hasUpdates:
         server.exec("restart_if_empty 1")
-    keepUpLock -= 1
-    sleep(600)
+
+    for _ in range(0, 600):
+        if not server.running:
+            return
+        sleep(1)
 
 def stdinChecker():
     for line in stdin:
         server.exec(line.strip())
 
-updateCheckerThread = Thread(target=updateChecker, name="Update checker", daemon=True)
+updateCheckerThread = Thread(target=updateChecker, name="Update checker")
 updateCheckerThread.start()
 
 stdinThread = Thread(target=stdinChecker, name="STDIN reader", daemon=True)
@@ -77,5 +76,4 @@ stdinThread.start()
 while server.poll(waitTime=1):
     pass
 
-while keepUpLock > 0:
-    sleep(1)
+updateCheckerThread.join()

@@ -18,6 +18,8 @@ class ServerProcess:
         self.proc = None
 
         self.config = config
+        
+        self.running = False
 
     def switchTo(self):
         chdir(self.folder)
@@ -78,9 +80,11 @@ quit
         }
 
         self.kill()
+        self.running = True
         self.proc = Popen(args, env=env, stdin=PIPE, close_fds=True, encoding='utf-8')
 
     def kill(self):
+        self.running = False
         if self.proc:
             try:
                 self.proc.kill()
