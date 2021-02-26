@@ -71,7 +71,7 @@ def updateChecker():
                 break
             sleep(1)
 
-def handleSigusr1():
+def handleSigusr1(_a, _b):
     global forceRunUpdateCheck
     forceRunUpdateCheck = True
 signal(SIGUSR1, handleSigusr1)
