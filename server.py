@@ -1,11 +1,8 @@
 from os import chdir, path
-from sys import stdout, stderr
 from subprocess import PIPE, Popen, call
-from sys import stdout
 from tempfile import NamedTemporaryFile
-from threading import Thread
-from queue import Queue, Empty
 from workshop import getWorkshopItems
+from time import sleep
 
 STREAM_STDOUT = 0
 STREAM_STDERR = 1
@@ -19,9 +16,6 @@ class ServerProcess:
 
         self.pidfile = path.join(self.folder, "pid")
         self.proc = None
-        self.stdoutThread = None
-        self.stderrThread = None
-        self.stdioQueue = None
 
         self.config = config
 
@@ -84,21 +78,7 @@ quit
         }
 
         self.kill()
-
-        self.stdioQueue = Queue()
-        self.stdoutThread = Thread(target=self._read_stdout, name="Server stdout", daemon=True)
-        self.stderrThread = Thread(target=self._read_stderr, name="Server stderr", daemon=True)
-        self.proc = Popen(args, env=env, stdout=PIPE, stderr=PIPE, stdin=PIPE, close_fds=True, encoding='utf-8')
-        self.stdoutThread.start()
-        self.stderrThread.start()
-
-    def _read_stdout(self):
-        for line in self.proc.stdout:
-            self.stdioQueue.put((line, STREAM_STDOUT))
-
-    def _read_stderr(self):
-        for line in self.proc.stderr:
-            self.stdioQueue.put((line, STREAM_STDERR))
+        self.proc = Popen(args, env=env, stdin=PIPE, close_fds=True, encoding='utf-8')
 
     def kill(self):
         if self.proc:
@@ -108,38 +88,17 @@ quit
                 pass
             self.proc = None
             
-        if self.stdoutThread:
-            self.stdoutThread.join()
-            self.stdoutThread = None
-        if self.stderrThread:
-            self.stderrThread.join()
-            self.stderrThread = None
-
-        if self.stdioQueue:
-            self.stdioQueue = None
-            
     def exec(self, cmd):
         if not self.proc:
             return
+        print("[StarLord] Running: %s" % cmd)
         self.proc.stdin.write("%s\n" % cmd)
         self.proc.stdin.flush()
 
-    def poll(self):
+    def poll(self, waitTime):
         if not self.proc:
             return False
-
-        try:
-            out = self.stdioQueue.get_nowait()
-            fh = None
-            if out[1] == STREAM_STDOUT:
-                fh = stdout
-            elif out[1] == STREAM_STDERR:
-                fh = stderr
-            fh.write(out[0])
-            fh.flush()
-        except Empty:
-            pass
-
+        sleep(waitTime)
         if self.proc.poll() != None:
             self.kill()
             return False

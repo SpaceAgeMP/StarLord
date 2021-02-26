@@ -61,5 +61,5 @@ def updateChecker():
 t = Thread(target=updateChecker, name="Update checker", daemon=True)
 t.start()
 
-while server.poll():
+while server.poll(waitTime=1):
     pass
