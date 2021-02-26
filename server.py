@@ -5,9 +5,13 @@ from sys import stdout
 from tempfile import NamedTemporaryFile
 from threading import Thread
 from queue import Queue, Empty
+from workshop import getWorkshopItems
 
 STREAM_STDOUT = 0
 STREAM_STDERR = 1
+
+LOADADDONS_FILE_GMOD = "autorun/server/loadaddons.lua"
+LOADADDONS_FILE_SERVER = "garrysmod/lua/%s" % LOADADDONS_FILE_GMOD
 
 class ServerProcess:
     def __init__(self, folder, config):
@@ -24,7 +28,7 @@ class ServerProcess:
     def switchTo(self):
         chdir(self.folder)
 
-    def update_bin(self):
+    def updateBin(self):
         self.switchTo()
 
         steamcmdScript = """
@@ -45,13 +49,24 @@ quit
         finally:
             tmpFile.close()
 
-    def update(self):
-        if not self.config.workshop_clients:
-            return
-        # TODO: Write loadaddons.lua
+    def updateWorkshopLua(self):
+        self.switchTo()
+
+        fileData = ""
+        if self.config.workshop_clients:
+            for item in getWorkshopItems(self.config.workshop_clients):
+                fileData += "resource.AddWorkshop(\"%s\")\n" % item
+        fh = open(LOADADDONS_FILE_SERVER, "w")
+        fh.write(fileData)
+        fh.close()
+
+        self.exec("lua_openscript %s" % LOADADDONS_FILE_GMOD)
 
     def run(self):
         self.switchTo()
+
+        if not path.exists(LOADADDONS_FILE_SERVER):
+            self.updateWorkshopLua()
 
         args = ["./bin/linux64/srcds",
                     "-usercon", "-autoupdate", "-disableluarefresh", "-console",
@@ -71,10 +86,8 @@ quit
         self.kill()
 
         self.stdioQueue = Queue()
-        self.stdoutThread = Thread(target=self._read_stdout)
-        self.stderrThread = Thread(target=self._read_stderr)
-        self.stdoutThread.daemon = True
-        self.stderrThread.daemon = True
+        self.stdoutThread = Thread(target=self._read_stdout, name="Server stdout", daemon=True)
+        self.stderrThread = Thread(target=self._read_stderr, name="Server stderr", daemon=True)
         self.proc = Popen(args, env=env, stdout=PIPE, stderr=PIPE, stdin=PIPE, close_fds=True, encoding='utf-8')
         self.stdoutThread.start()
         self.stderrThread.start()
@@ -104,6 +117,12 @@ quit
 
         if self.stdioQueue:
             self.stdioQueue = None
+            
+    def exec(self, cmd):
+        if not self.proc:
+            return
+        self.proc.stdin.write("%s\n" % cmd)
+        self.proc.stdin.flush()
 
     def poll(self):
         if not self.proc:

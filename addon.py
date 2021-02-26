@@ -4,6 +4,11 @@ from utils import unlink_safe
 
 usedDLLs = set()
 usedGamemodes = set()
+usedAddons = set()
+
+usedGamemodes.add("base")
+usedGamemodes.add("sandbox")
+usedGamemodes.add("terrortown")
 
 class Addon:
     def __init__(self, config):
@@ -15,13 +20,19 @@ class Addon:
         elif config.private:
             self.repo = "git@github.com:SpaceAgeMP/%s" % config.name
         else:
-            self.repo = "https://github.com/SpaceAgeMP%s" % config.name
+            self.repo = "https://github.com/SpaceAgeMP/%s" % config.name
         self.trusted = config.trusted
         self.git = GitRepo(self.folder, self.repo)
 
+    def checkUpdate(self, offline=False):
+        return self.git.checkUpdate(offline)
+
     def update(self):
-        if not self.git.update():
-            return
+        self.git.update()
+        self.check()
+
+    def check(self):
+        usedAddons.add(self.nameLower)
 
         gamemodeFolder = "%s/gamemodes/%s" % (self.folder, self.nameLower)
         if path.exists(gamemodeFolder):
@@ -46,3 +57,6 @@ def isDLLUsed(dll):
 
 def isGamemodeUsed(gamemode):
     return gamemode in usedGamemodes
+
+def isAddonUsed(addon):
+    return addon in usedAddons
