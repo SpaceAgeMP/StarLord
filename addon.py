@@ -6,18 +6,17 @@ usedDLLs = set()
 usedGamemodes = set()
 
 class Addon:
-    def __init__(self, name, repo=None, private=False):
-        self.name = name
-        self.nameLower = name.lower()
+    def __init__(self, config):
+        self.name = config.name
+        self.nameLower = config.name.lower()
         self.folder = "garrysmod/addons/%s" % self.nameLower
-        if repo:
-            self.repo = repo
-        elif private:
-            self.repo = "git@github.com:SpaceAgeMP/%s" % name
-            self.trusted = True
+        if config.repo:
+            self.repo = config.repo
+        elif config.private:
+            self.repo = "git@github.com:SpaceAgeMP/%s" % config.name
         else:
-            self.repo = "https://github.com/SpaceAgeMP%s" % name
-            self.trusted = True
+            self.repo = "https://github.com/SpaceAgeMP%s" % config.name
+        self.trusted = config.trusted
         self.git = GitRepo(self.folder, self.repo)
 
     def update(self):

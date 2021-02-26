@@ -1,0 +1,21 @@
+server:
+  maxplayers: 16
+  tickrate: 20
+  map: "gm_flatgrass"
+  ip: "0.0.0.0"
+  workshop_clients: "177294269"
+  workshop_server: "2371557248"
+  gamemode: "spaceage"
+addons:
+- name: SpaceAge
+  private: yes
+  trusted: yes
+- name: sbep
+- name: spacebuild
+- name: multi-parent
+- name: physgun-build-mode
+- name: Falcos-Prop-protection
+- name: wire-extras
+  repo: https://github.com/wiremod/wire-extras
+- name: lua_reloadent
+  repo: https://github.com/TomyLobo/lua_reloadent

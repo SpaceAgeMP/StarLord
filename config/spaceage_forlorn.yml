@@ -1,0 +1,3 @@
+inherit: spaceage_base
+server:
+  map: "sb_forlorn_sb3_r3"

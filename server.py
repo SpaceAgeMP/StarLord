@@ -10,7 +10,7 @@ STREAM_STDOUT = 0
 STREAM_STDERR = 1
 
 class ServerProcess:
-    def __init__(self, folder):
+    def __init__(self, folder, config):
         self.folder = path.abspath(folder)
 
         self.pidfile = path.join(self.folder, "pid")
@@ -19,18 +19,12 @@ class ServerProcess:
         self.stderrThread = None
         self.stdioQueue = None
 
-        self.tickrate = 20
-        self.maxplayers = 16
-        self.map = "sb_gooniverse_v4"
-        self.ip = "0.0.0.0"
-        self.workshop_clients = "177294269"
-        self.workshop_server = "2371557248"
-        self.gamemode = "spaceage"
+        self.config = config
 
     def switchTo(self):
         chdir(self.folder)
 
-    def update(self):
+    def update_bin(self):
         self.switchTo()
 
         steamcmdScript = """
@@ -51,14 +45,24 @@ quit
         finally:
             tmpFile.close()
 
+    def update(self):
+        if not self.config.workshop_clients:
+            return
+        # TODO: Write loadaddons.lua
+
     def run(self):
         self.switchTo()
 
         args = ["./bin/linux64/srcds",
                     "-usercon", "-autoupdate", "-disableluarefresh", "-console",
-                    "-tickrate", "%i" % self.tickrate, "-game", "garrysmod", "+ip", self.ip, "+maxplayers", "%i" % self.maxplayers,
-                    "+map", self.map, "+host_workshop_collection", self.workshop_server, "+gamemode", self.gamemode
+                    "-tickrate", "%i" % self.config.tickrate, "-game", "garrysmod", "+ip", self.config.ip, "+maxplayers", "%i" % self.config.maxplayers,
+                    "+map", self.config.map, "+gamemode", self.config.gamemode
         ]
+
+        if self.config.workshop_server:
+            args.append("+host_workshop_collection")
+            args.append(self.config.workshop_server)
+
         env = {
             "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/game",
             "LD_LIBRARY_PATH": path.abspath("./bin/linux64"),
