@@ -94,6 +94,4 @@ def load(config):
             cfg.addons.append(addonCfg)
     cfg.inherit = None
 
-    print(vars(cfg.server))
-
     return cfg
