@@ -53,12 +53,13 @@ class Addon:
                 symlink("../../../%s/%s" % (binFolder, dll), dllLink, False)
                 usedDLLs.add(dll)
 
-        cfgFolder = "%s/cfg"
+        cfgFolder = "%s/cfg" % self.folder
         if self.trusted and path.exists(cfgFolder):
             gameCfgFolder = "garrysmod/cfg"
             if not path.exists(gameCfgFolder):
                 mkdir(gameCfgFolder)
             for cfg in listdir(cfgFolder):
+                print(cfgFolder, gameCfgFolder, cfg)
                 copyfile("%s/%s" % (cfgFolder, cfg), "%s/%s" % (gameCfgFolder, cfg))
 
 def isDLLUsed(dll):

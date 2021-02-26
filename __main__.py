@@ -51,9 +51,7 @@ def cleanupFolders():
     cleanupFolder("garrysmod/lua/bin", isDLLUsed)
 
 runUpdates()
-
 cleanupFolders()
-
 server.run()
 
 def updateChecker():
