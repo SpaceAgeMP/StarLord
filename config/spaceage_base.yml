@@ -15,6 +15,7 @@ addons:
 - name: multi-parent
 - name: physgun-build-mode
 - name: Falcos-Prop-protection
+- name: Joystick
 - name: wire-extras
   repo: https://github.com/wiremod/wire-extras
 - name: lua_reloadent
