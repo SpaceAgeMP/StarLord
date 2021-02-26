@@ -5,6 +5,7 @@ from config import load
 from os import listdir, path
 from time import sleep
 from threading import Thread
+from sys import stdin
 
 config = load("spaceage_forlorn")
 server = ServerProcess(".", config.server)
@@ -58,8 +59,15 @@ def updateChecker():
         server.exec("restart_if_empty 1")
     sleep(600)
 
-t = Thread(target=updateChecker, name="Update checker", daemon=True)
-t.start()
+def stdinChecker():
+    for line in stdin:
+        server.exec(line.strip())
+
+updateCheckerThread = Thread(target=updateChecker, name="Update checker", daemon=True)
+updateCheckerThread.start()
+
+stdinThread = Thread(target=stdinChecker, name="STDIN reader", daemon=True)
+stdinThread.start()
 
 while server.poll(waitTime=1):
     pass
