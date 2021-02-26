@@ -1,3 +1,4 @@
+from git import GitRepo
 from subprocess import call
 from server import ServerProcess
 from addon import Addon, isAddonUsed, isDLLUsed, isGamemodeUsed
@@ -6,6 +7,9 @@ from os import listdir, path, getenv
 from time import sleep
 from threading import Thread
 from sys import stdin
+
+FOLDER = path.dirname(__file__)
+selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git")
 
 config = load(getenv("STARLORD_CONFIG"))
 server = ServerProcess(path.join(getenv("HOME"), "s"), config.server)
@@ -21,7 +25,7 @@ def runUpdates():
         addon.update()
 
 def checkUpdates():
-    hasUpdates = False
+    hasUpdates = selfRepo.checkUpdate()
     for addon in addons:
         if addon.checkUpdate():
             hasUpdates = True
@@ -78,3 +82,5 @@ while server.poll(waitTime=1):
     pass
 
 updateCheckerThread.join()
+
+selfRepo.update()
