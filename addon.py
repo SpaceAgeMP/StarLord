@@ -1,6 +1,7 @@
 from git import GitRepo
 from os import mkdir, path, symlink, listdir
 from utils import unlink_safe
+from shutil import copyfile
 
 usedDLLs = set()
 usedGamemodes = set()
@@ -51,6 +52,14 @@ class Addon:
                 unlink_safe(dllLink)
                 symlink("../../../%s/%s" % (binFolder, dll), dllLink, False)
                 usedDLLs.add(dll)
+
+        cfgFolder = "%s/cfg"
+        if self.trusted and path.exists(cfgFolder):
+            gameCfgFolder = "garrysmod/cfg"
+            if not path.exists(gameCfgFolder):
+                mkdir(gameCfgFolder)
+            for cfg in listdir(cfgFolder):
+                copyfile("%s/%s" % (cfgFolder, cfg), "%s/%s" % (gameCfgFolder, cfg))
 
 def isDLLUsed(dll):
     return dll in usedDLLs
