@@ -2,12 +2,12 @@ from subprocess import call
 from server import ServerProcess
 from addon import Addon, isAddonUsed, isDLLUsed, isGamemodeUsed
 from config import load
-from os import listdir, path
+from os import listdir, path, getenv
 from time import sleep
 from threading import Thread
 from sys import stdin
 
-config = load("spaceage_forlorn")
+config = load(getenv("STARLORD_CONFIG"))
 server = ServerProcess(".", config.server)
 
 addons = []
