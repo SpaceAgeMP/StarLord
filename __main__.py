@@ -29,6 +29,8 @@ def runUpdates():
 
 def checkUpdates():
     hasUpdates = selfRepo.checkUpdate()
+    if hasUpdates:
+        selfRepo.update()
     for addon in addons:
         if addon.checkUpdate():
             hasUpdates = True
@@ -91,5 +93,3 @@ while server.poll(waitTime=1):
     pass
 
 updateCheckerThread.join()
-
-selfRepo.update()
