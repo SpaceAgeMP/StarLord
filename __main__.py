@@ -70,8 +70,9 @@ def stdinChecker():
 updateCheckerThread = Thread(target=updateChecker, name="Update checker")
 updateCheckerThread.start()
 
-stdinThread = Thread(target=stdinChecker, name="STDIN reader", daemon=True)
-stdinThread.start()
+if stdin.isatty():
+    stdinThread = Thread(target=stdinChecker, name="STDIN reader", daemon=True)
+    stdinThread.start()
 
 while server.poll(waitTime=1):
     pass
