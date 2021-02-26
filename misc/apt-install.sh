@@ -8,4 +8,6 @@ echo steam steamcmd/license note '' | debconf-set-selections
 dpkg --add-architecture i386
 apt update
 apt -y dist-upgrade
-apt -y install openssl git steamcmd tmux sudo curl htop haveged libsdl2-2.0-0
+apt -y install openssl git steamcmd tmux sudo curl htop haveged libsdl2-2.0-0 python3 python3-yaml python3-requests
+
+git clone https://github.com/SpaceAgeMP/StarLord /opt/StarLord

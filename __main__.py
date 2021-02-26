@@ -8,7 +8,7 @@ from threading import Thread
 from sys import stdin
 
 config = load(getenv("STARLORD_CONFIG"))
-server = ServerProcess(".", config.server)
+server = ServerProcess(path.join(getenv("HOME"), "s"), config.server)
 
 addons = []
 for addonCfg in config.addons:
