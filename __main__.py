@@ -7,12 +7,15 @@ from os import listdir, path, getenv
 from time import sleep
 from threading import Thread
 from sys import stdin
+from signal import signal, SIGUSR1
 
 FOLDER = path.dirname(__file__)
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git")
 
 config = load(getenv("STARLORD_CONFIG"))
 server = ServerProcess(path.join(getenv("HOME"), "s"), config.server)
+
+forceRunUpdateCheck = False
 
 addons = []
 for addonCfg in config.addons:
@@ -55,15 +58,23 @@ cleanupFolders()
 server.run()
 
 def updateChecker():
-    print("Checking for updates...")
-    hasUpdates = checkUpdates()
-    if hasUpdates:
-        server.exec("restart_if_empty 1")
+    global forceRunUpdateCheck
+    while server.running:
+        print("Checking for updates...")
+        forceRunUpdateCheck = False
+        hasUpdates = checkUpdates()
+        if hasUpdates:
+            server.exec("restart_if_empty 1")
 
-    for _ in range(0, 600):
-        if not server.running:
-            return
-        sleep(1)
+        for _ in range(0, 600):
+            if forceRunUpdateCheck or not server.running:
+                break
+            sleep(1)
+
+def handleSigusr1():
+    global forceRunUpdateCheck
+    forceRunUpdateCheck = True
+signal(SIGUSR1, handleSigusr1)
 
 def stdinChecker():
     for line in stdin:
