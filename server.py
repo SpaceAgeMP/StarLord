@@ -39,6 +39,8 @@ class ServerProcess:
         return json_loads(res.text)
 
     def writeLocalGameCfg(self):
+        self.switchTo()
+
         data = self.getAPIData()
 
         localCfg = """
