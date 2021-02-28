@@ -13,10 +13,11 @@ FOLDER = path.dirname(__file__)
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git")
 
 config = load(getenv("STARLORD_CONFIG"))
+
 server = ServerProcess(path.join(getenv("HOME"), "s"), config.server)
+server.writeLocalGameCfg()
 
 forceRunUpdateCheck = False
-
 
 def handleSigusr1(_a, _b):
     global forceRunUpdateCheck

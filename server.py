@@ -1,8 +1,11 @@
+import json
 from os import chdir, path
 from subprocess import PIPE, Popen, call
 from tempfile import NamedTemporaryFile
 from workshop import getWorkshopItems
 from time import sleep
+from json import loads as json_loads
+from requests import get as http_get
 
 STREAM_STDOUT = 0
 STREAM_STDERR = 1
@@ -20,6 +23,32 @@ class ServerProcess:
         self.config = config
         
         self.running = False
+
+        fh = open(path.join(self.folder, "garrysmod/sa_config/api.json"))
+        data = fh.read()
+        fh.close()
+
+        dataDict = json_loads(data)
+        self.serverToken = dataDict["serverToken"]
+        self.apiAuth = "Server %s" % self.serverToken
+
+    def getAPIData(self):
+        res = http_get("https://api.spaceage.mp/v2/servers/self", headers={
+            "Authorization": self.apiAuth,
+        })
+        return json_loads(res.text)
+
+    def writeLocalGameCfg(self):
+        data = self.getAPIData()
+
+        localCfg = """
+sv_setsteamaccount %s
+rcon_password "%s"
+""" % (data["steam_account_token"], data["rcon_password"])
+
+        fh = open(path.join(self.folder, "garrysmod/cfg/localgame.cfg"), "w")
+        fh.write(localCfg)
+        fh.close()
 
     def switchTo(self):
         chdir(self.folder)
