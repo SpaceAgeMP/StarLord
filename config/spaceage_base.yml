@@ -16,6 +16,7 @@ addons:
 - name: physgun-build-mode
 - name: Falcos-Prop-protection
 - name: Joystick
+- name: smartsnap
 - name: wire-extras
   repo: https://github.com/wiremod/wire-extras
 - name: lua_reloadent
