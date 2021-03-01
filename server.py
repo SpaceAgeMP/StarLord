@@ -56,7 +56,7 @@ hostname "SpaceAge [%s]"
         localCfg = """
 require("sentry")
 sentry.Setup("%s", {server_name = "%s"})
-""" % (data["sentry_dsn"], data["server_name"])
+""" % (data["sentry_dsn"], data["name"])
 
         fh = open(path.join(self.folder, "garrysmod/lua/autorun/server/localcfg.lua"), "w")
         fh.write(localCfg)
