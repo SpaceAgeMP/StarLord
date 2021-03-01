@@ -15,7 +15,7 @@ selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git")
 config = load(getenv("STARLORD_CONFIG"))
 
 server = ServerProcess(path.join(getenv("HOME"), "s"), config.server)
-server.writeLocalGameCfg()
+server.writeLocalConfig()
 
 forceRunUpdateCheck = False
 

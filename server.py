@@ -38,7 +38,7 @@ class ServerProcess:
         })
         return json_loads(res.text)
 
-    def writeLocalGameCfg(self):
+    def writeLocalConfig(self):
         self.switchTo()
 
         data = self.getAPIData()
@@ -46,9 +46,19 @@ class ServerProcess:
         localCfg = """
 sv_setsteamaccount %s
 rcon_password "%s"
-""" % (data["steam_account_token"], data["rcon_password"])
+hostname "SpaceAge [%s]"
+""" % (data["steam_account_token"], data["rcon_password"], data["name"])
 
         fh = open(path.join(self.folder, "garrysmod/cfg/localgame.cfg"), "w")
+        fh.write(localCfg)
+        fh.close()
+
+        localCfg = """
+require("sentry")
+sentry.Setup("%s", {server_name = "%s"})
+""" % (data["sentry_dsn"], data["server_name"])
+
+        fh = open(path.join(self.folder, "garrysmod/lua/autorun/server/localcfg.lua"), "w")
         fh.write(localCfg)
         fh.close()
 
