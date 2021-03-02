@@ -183,7 +183,7 @@ quit
             return False
 
         if self.state == STATE_STARTING:
-            lsof = check_output(["lsof", "-Pani", "-p", "%d" % self.proc.pid, "-FPn"]).strip().split("\n")
+            lsof = check_output(["lsof", "-Pani", "-p", "%d" % self.proc.pid, "-FPn"]).decode("utf8").strip().split("\n")
 
             clistenUDP = 0
 
