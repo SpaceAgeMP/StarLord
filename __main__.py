@@ -7,7 +7,7 @@ from os import listdir, path, getenv
 from time import sleep
 from threading import Thread
 from sys import stdin
-from signal import alarm, signal, SIGALRM, SIGTERM, SIGUSR1
+from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1, signal
 
 FOLDER = path.dirname(__file__)
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git")
@@ -24,15 +24,11 @@ def handleSigusr1(_a, _b):
     forceRunUpdateCheck = True
 signal(SIGUSR1, handleSigusr1)
 
-def handleSigterm(_a, _b):
-    server.exec("exit")
-    alarm(15)
-signal(SIGTERM, handleSigterm)
-
-def handleSigalrm(_a, _b):
-    server.kill()
-signal(SIGALRM, handleSigalrm)
-
+def handleStopSignal(_a, _b):
+    server.stop()
+signal(SIGTERM, handleStopSignal)
+signal(SIGINT, handleStopSignal)
+signal(SIGHUP, handleStopSignal)
 
 addons = []
 for addonCfg in config.addons:

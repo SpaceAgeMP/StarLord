@@ -1,14 +1,19 @@
-import json
 from os import chdir, path
-from subprocess import PIPE, Popen, call
+from subprocess import PIPE, Popen, call, check_output
 from tempfile import NamedTemporaryFile
 from workshop import getWorkshopItems
 from time import sleep
 from json import loads as json_loads
 from requests import get as http_get
+from utils import Timeout
 
 STREAM_STDOUT = 0
 STREAM_STDERR = 1
+
+STATE_STOPPED = 0
+STATE_STARTING = 1
+STATE_RUNNING = 2
+STATE_STOPPING = 3
 
 LOADADDONS_FILE_GMOD = "autorun/server/loadaddons.lua"
 LOADADDONS_FILE_SERVER = "garrysmod/lua/%s" % LOADADDONS_FILE_GMOD
@@ -23,6 +28,8 @@ class ServerProcess:
         self.config = config
         
         self.running = False
+        self.state = STATE_STOPPED
+        self.timeout = None
 
         fh = open(path.join(self.folder, "garrysmod/sa_config/api.json"))
         data = fh.read()
@@ -122,10 +129,37 @@ quit
 
         self.kill()
         self.running = True
+        self.setState(STATE_STARTING)
         self.proc = Popen(args, env=env, stdin=PIPE, close_fds=True, encoding='utf-8')
+        self.setStateTimeout(60, self.kill)
+
+    def setState(self, state):
+        self.clearStateTimeout()
+        self.state = state
+        print("[StarLord] Server state changed to %d" % self.state)
+
+    def clearStateTimeout(self):
+        if self.timeout:
+            self.timeout.cancel()
+            self.timeout = None
+
+    def setStateTimeout(self, timeout, func):
+        self.clearStateTimeout()
+        self.timeout = Timeout(timeout, func)
+        self.timeout.start()
+
+    def stop(self):
+        if self.state == STATE_RUNNING:
+            self.setState(STATE_STOPPING)
+            self.exec("exit")
+            self.setStateTimeout(15, self.kill)
+        elif self.state != STATE_STOPPING:
+            self.kill()
 
     def kill(self):
         self.running = False
+        self.setState(STATE_STOPPED)
+
         if self.proc:
             try:
                 self.proc.kill()
@@ -147,4 +181,29 @@ quit
         if self.proc.poll() != None:
             self.kill()
             return False
+
+        if self.state == STATE_STARTING:
+            lsof = check_output(["lsof", "-Pani", "-p", "%d" % self.proc.pid, "-FPn"]).strip().split("\n")
+
+            clistenUDP = 0
+
+            proto = None
+            sock = None
+            for line in lsof:
+                typ = line[0]
+                data = line[1:].strip()
+                if typ == "P":
+                    proto = data
+                elif typ == "n":
+                    sock = data
+
+                if proto and sock:
+                    if proto == "UDP" and sock[0:2] == "*:":
+                        clistenUDP += 1
+                    proto = None
+                    sock = None
+            
+            if clistenUDP >= 3:
+                self.setState(STATE_RUNNING)
+
         return True
