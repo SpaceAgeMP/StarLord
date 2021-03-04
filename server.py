@@ -216,7 +216,7 @@ quit
                 print("[StarLord] lsof failed...")
                 pass
 
-            clistenUDP = 0
+            serverUDP = False
 
             proto = None
             sock = None
@@ -229,12 +229,13 @@ quit
                     sock = data
 
                 if proto and sock:
-                    if proto == "UDP" and sock[0:2] == "*:":
-                        clistenUDP += 1
+                    if proto == "UDP" and sock == "%s:%d" % (self.ip, self.port):
+                        serverUDP = True
+                        break
                     proto = None
                     sock = None
             
-            if clistenUDP >= 3:
+            if serverUDP:
                 self.setStateWithKillTimeout(STATE_LISTENING, 60)
         elif self.state == STATE_LISTENING:
             if self.ping():
