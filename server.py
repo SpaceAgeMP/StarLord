@@ -210,7 +210,11 @@ quit
             return False
 
         if self.state == STATE_STARTING:
-            lsof = check_output(["lsof", "-Pani", "-p", "%d" % self.proc.pid, "-FPn"]).decode("utf8").strip().split("\n")
+            lsof = ""
+            try:
+                lsof = check_output(["lsof", "-Pani", "-p", "%d" % self.proc.pid, "-FPn"]).decode("utf8").strip().split("\n")
+            except:
+                pass
 
             clistenUDP = 0
 
