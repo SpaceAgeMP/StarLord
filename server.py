@@ -5,7 +5,8 @@ from workshop import getWorkshopItems
 from time import sleep
 from json import loads as json_loads
 from requests import get as http_get
-from utils import Timeout
+from utils import Timeout, get_default_ip
+from a2s import info as a2s_info
 
 STREAM_STDOUT = 0
 STREAM_STDERR = 1
@@ -14,6 +15,8 @@ STATE_STOPPED = 0
 STATE_STARTING = 1
 STATE_RUNNING = 2
 STATE_STOPPING = 3
+STATE_LISTENING = 4
+STATE_FAILING = 5
 
 LOADADDONS_FILE_GMOD = "autorun/server/loadaddons.lua"
 LOADADDONS_FILE_SERVER = "garrysmod/lua/%s" % LOADADDONS_FILE_GMOD
@@ -30,6 +33,12 @@ class ServerProcess:
         self.running = False
         self.state = STATE_STOPPED
         self.timeout = None
+        
+        self.ip = config.ip
+        self.port = config.port
+
+        if self.ip == "0.0.0.0":
+            self.ip = get_default_ip()
 
         fh = open(path.join(self.folder, "garrysmod/sa_config/api.json"))
         data = fh.read()
@@ -114,7 +123,8 @@ quit
 
         args = ["./bin/linux64/srcds",
                     "-usercon", "-autoupdate", "-disableluarefresh", "-console",
-                    "-tickrate", "%i" % self.config.tickrate, "-game", "garrysmod", "+ip", self.config.ip, "+maxplayers", "%i" % self.config.maxplayers,
+                    "+ip", self.ip, "-port", "%i" % self.port,
+                    "-tickrate", "%i" % self.config.tickrate, "-game", "garrysmod", "+maxplayers", "%i" % self.config.maxplayers,
                     "+map", self.config.map, "+gamemode", self.config.gamemode
         ]
 
@@ -129,14 +139,20 @@ quit
 
         self.kill()
         self.running = True
-        self.setState(STATE_STARTING)
+        self.setStateWithKillTimeout(STATE_STARTING, 60)
         self.proc = Popen(args, env=env, stdin=PIPE, close_fds=True, encoding='utf-8')
-        self.setStateTimeout(60, self.kill)
+
+    def setStateWithKillTimeout(self, state, timeout):
+        if self.setState(state):
+            self.setStateTimeout(timeout, self.kill)
 
     def setState(self, state):
+        if self.state == state:
+            return False
         self.clearStateTimeout()
         self.state = state
         print("[StarLord] Server state changed to %d" % self.state)
+        return True
 
     def clearStateTimeout(self):
         if self.timeout:
@@ -150,9 +166,8 @@ quit
 
     def stop(self):
         if self.state == STATE_RUNNING:
-            self.setState(STATE_STOPPING)
+            self.setStateWithKillTimeout(STATE_STOPPING, 15)
             self.exec("exit")
-            self.setStateTimeout(15, self.kill)
         elif self.state != STATE_STOPPING:
             self.kill()
 
@@ -166,13 +181,25 @@ quit
             except ProcessLookupError:
                 pass
             self.proc = None
-            
+
     def exec(self, cmd):
         if not self.proc:
             return
         print("[StarLord] Running: %s" % cmd)
         self.proc.stdin.write("%s\n" % cmd)
         self.proc.stdin.flush()
+
+    def ping(self):
+        addr = (self.ip, self.port)
+
+        try:
+            res = a2s_info(addr)
+            if res.ping:
+                return True
+        except:
+            pass
+        
+        return False
 
     def poll(self, waitTime):
         if not self.proc:
@@ -204,6 +231,15 @@ quit
                     sock = None
             
             if clistenUDP >= 3:
+                self.setStateWithKillTimeout(STATE_LISTENING, 60)
+        elif self.state == STATE_LISTENING:
+            if self.ping():
+                self.setState(STATE_RUNNING)
+        elif self.state == STATE_RUNNING:
+            if not self.ping():
+                self.setStateWithKillTimeout(STATE_FAILING, 60)
+        elif self.state == STATE_FAILING:
+            if self.ping():
                 self.setState(STATE_RUNNING)
 
         return True

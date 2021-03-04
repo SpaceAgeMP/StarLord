@@ -1,6 +1,15 @@
 from os import unlink
 from threading import Thread
 from time import sleep
+from socket import socket, AF_INET, SOCK_DGRAM
+
+def get_default_ip():
+    addr = ("8.8.8.8", 53)
+    s = socket(AF_INET, SOCK_DGRAM)
+    s.connect(addr)
+    ip = s.getsockname()[0]
+    s.close()
+    return ip
 
 def unlink_safe(path):
     try:

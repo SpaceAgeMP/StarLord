@@ -40,6 +40,7 @@ class ServerConfig:
         self.maxplayers = 32
         self.map = "gm_flatgrass"
         self.ip = "0.0.0.0"
+        self.port = 27015
         self.gamemode = "sandbox"
 
 def dict_to_obj(dict, o):
