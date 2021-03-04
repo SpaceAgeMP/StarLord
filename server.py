@@ -203,10 +203,15 @@ quit
     def poll(self, waitTime):
         if not self.proc:
             return False
+
         sleep(waitTime)
-        if self.proc.poll() != None:
-            self.kill()
-            return False
+
+        try:
+            if self.proc.poll() != None:
+                self.kill()
+                return False
+        except:
+            return True
 
         if self.state == STATE_STARTING:
             lsof = ""
