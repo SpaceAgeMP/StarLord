@@ -133,7 +133,6 @@ quit
             args.append(self.config.workshop_server)
 
         env = {
-            "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/game",
             "LD_LIBRARY_PATH": path.abspath("./bin/linux64"),
         }
 
@@ -214,6 +213,7 @@ quit
             try:
                 lsof = check_output(["lsof", "-Pani", "-p", "%d" % self.proc.pid, "-FPn"]).decode("utf8").strip().split("\n")
             except:
+                print("[StarLord] lsof failed...")
                 pass
 
             clistenUDP = 0
