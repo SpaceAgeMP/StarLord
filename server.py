@@ -1,4 +1,4 @@
-from os import chdir, path
+from os import chdir, path, O_NONBLOCK, read, write
 from subprocess import PIPE, Popen, call, check_output
 from tempfile import NamedTemporaryFile
 from workshop import getWorkshopItems
@@ -7,6 +7,11 @@ from json import loads as json_loads
 from requests import get as http_get
 from utils import Timeout, get_default_ip
 from a2s import info as a2s_info
+from select import select
+from threading import Thread
+from sys import stdout
+from pty import openpty
+from fcntl import fcntl, F_GETFL, F_SETFL
 
 STREAM_STDOUT = 0
 STREAM_STDERR = 1
@@ -27,6 +32,9 @@ class ServerProcess:
 
         self.pidfile = path.join(self.folder, "pid")
         self.proc = None
+        self.ptyMaster = None
+        self.ptySlave = None
+        self.stdoutThread = None
 
         self.config = config
         
@@ -139,7 +147,27 @@ quit
         self.kill()
         self.running = True
         self.setStateWithKillTimeout(STATE_STARTING, 60)
-        self.proc = Popen(args, env=env, stdin=PIPE, close_fds=True, encoding='utf-8')
+
+        self.ptyMaster, self.ptySlave = openpty()
+        fl = fcntl(self.ptyMaster, F_GETFL)
+        fcntl(self.ptyMaster, F_SETFL, fl | O_NONBLOCK)
+
+        self.proc = Popen(args, env=env, bufsize=0, stdin=self.ptySlave, stdout=self.ptySlave, stderr=self.ptySlave, close_fds=True, encoding='utf-8')
+        self.stdoutThread = Thread(target=self.stdoutThreadFunc, daemon=True, name="Server stdout")
+        self.stdoutThread.start()
+    
+    def stdoutThreadFunc(self):
+        ins = [self.ptyMaster]
+        outs = []
+        while self.running:
+            readable, _, _ = select(ins, outs, ins)
+            for fd in readable:
+                data = read(fd, 8192).decode('utf-8')
+                self.onOutput(data)
+
+    def onOutput(self, data):
+        stdout.write(data)
+        stdout.flush()
 
     def setStateWithKillTimeout(self, state, timeout):
         if self.setState(state):
@@ -181,12 +209,19 @@ quit
                 pass
             self.proc = None
 
+        if self.ptyMaster:
+            self.ptyMaster.close()
+            self.ptyMaster = None
+
+        if self.ptySlave:
+            self.ptySlave.close()
+            self.ptySlave = None
+
     def exec(self, cmd):
         if not self.proc:
             return
         print("[StarLord] Running: %s" % cmd)
-        self.proc.stdin.write("%s\n" % cmd)
-        self.proc.stdin.flush()
+        write(self.ptyMaster, b"%s\n" % cmd.encode())
 
     def ping(self):
         addr = (self.ip, self.port)
