@@ -1,4 +1,4 @@
-from os import chdir, path, O_NONBLOCK, read, write
+from os import chdir, path, O_NONBLOCK, read, write, close
 from subprocess import PIPE, Popen, call, check_output
 from tempfile import NamedTemporaryFile
 from workshop import getWorkshopItems
@@ -210,11 +210,11 @@ quit
             self.proc = None
 
         if self.ptyMaster:
-            self.ptyMaster.close()
+            close(self.ptyMaster)
             self.ptyMaster = None
 
         if self.ptySlave:
-            self.ptySlave.close()
+            close(self.ptySlave)
             self.ptySlave = None
 
     def exec(self, cmd):
