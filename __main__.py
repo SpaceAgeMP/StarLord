@@ -35,7 +35,7 @@ for addonCfg in config.addons:
     addons.append(Addon(addonCfg))
 
 def runUpdates():
-    #server.updateBin()
+    server.updateBin()
     server.switchTo()
     for addon in addons:
         addon.update()
