@@ -22,5 +22,3 @@ addons:
   repo: https://github.com/wiremod/wire-extras
 - name: lua_reloadent
   repo: https://github.com/TomyLobo/lua_reloadent
-- name: sentry
-  repo: https://github.com/Lexicality/gmod-sentry
