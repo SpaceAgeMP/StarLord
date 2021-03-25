@@ -9,7 +9,7 @@ from threading import Thread
 from sys import stdin
 from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1, signal
 
-FOLDER = path.dirname(__file__)
+FOLDER = path.abspath(path.dirname(__file__))
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git")
 
 config = load(getenv("STARLORD_CONFIG"))

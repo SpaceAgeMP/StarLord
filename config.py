@@ -1,7 +1,7 @@
 from os import path
 from yaml import safe_load as yaml_load
 
-CONFIG_DIR = path.join(path.dirname(__file__), "config")
+CONFIG_DIR = path.abspath(path.join(path.dirname(__file__), "config"))
 
 class Config:
     def __init__(self):
