@@ -1,6 +1,6 @@
 from os import unlink
-from threading import Thread
-from time import sleep
+from threading import Thread, Event
+from time import sleep, time
 from socket import socket, AF_INET, SOCK_DGRAM
 
 def get_default_ip():
@@ -24,6 +24,7 @@ class Timeout:
         self.func = func
         self.running = True
         self.thread = Thread(target=self._func, daemon=True)
+        self.e = Event()
 
     def start(self):
         self.thread.start()
@@ -33,8 +34,9 @@ class Timeout:
 
     def cancel(self):
         self.running = False
+        self.e.set()
     
     def _func(self):
-        sleep(self.timeout)
+        self.e.wait(timeout=self.timeout)
         if self.running:
             self.func()

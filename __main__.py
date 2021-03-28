@@ -1,3 +1,4 @@
+from socket import timeout
 from git import GitRepo
 from subprocess import call
 from server import ServerProcess
@@ -5,7 +6,7 @@ from addon import Addon, isAddonUsed, isDLLUsed, isGamemodeUsed
 from config import load
 from os import listdir, path, getenv
 from time import sleep
-from threading import Thread
+from threading import Thread, Event
 from sys import stdin
 from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1, signal
 
@@ -17,11 +18,15 @@ config = load(getenv("STARLORD_CONFIG"))
 server = ServerProcess(path.join(getenv("HOME"), "s"), config.server)
 server.writeLocalConfig()
 
-forceRunUpdateCheck = False
+updateCheckerEvent = None
+def fireUpdateChecker():
+    global updateCheckerEvent
+    if updateCheckerEvent:
+        updateCheckerEvent.set()
+        updateCheckerEvent = None
 
 def handleSigusr1(_a, _b):
-    global forceRunUpdateCheck
-    forceRunUpdateCheck = True
+    fireUpdateChecker()
 signal(SIGUSR1, handleSigusr1)
 
 def handleStopSignal(_a, _b):
@@ -73,18 +78,15 @@ cleanupFolders()
 server.run()
 
 def updateChecker():
-    global forceRunUpdateCheck
+    global updateCheckerEvent
     while server.running:
         print("Checking for updates...")
-        forceRunUpdateCheck = False
         hasUpdates = checkUpdates()
         if hasUpdates:
             server.exec("restart_if_empty 1")
 
-        for _ in range(0, 600):
-            if forceRunUpdateCheck or not server.running:
-                break
-            sleep(1)
+        updateCheckerEvent = Event()
+        updateCheckerEvent.wait(timeout=600)
 
 def stdinChecker():
     for line in stdin:
@@ -100,4 +102,5 @@ if stdin.isatty():
 while server.poll(waitTime=1):
     pass
 
+fireUpdateChecker()
 updateCheckerThread.join()
