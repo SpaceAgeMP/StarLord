@@ -1,6 +1,5 @@
-from os import unlink
+from os import unlink, getenv
 from threading import Thread, Event
-from time import sleep, time
 from socket import socket, AF_INET, SOCK_DGRAM
 
 def get_default_ip():
@@ -10,6 +9,12 @@ def get_default_ip():
     ip = s.getsockname()[0]
     s.close()
     return ip
+
+def get_default_port():
+    envport = getenv("SRCDS_PORT")
+    if envport:
+        return int(envport)
+    return 27015
 
 def unlink_safe(path):
     try:

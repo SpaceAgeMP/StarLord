@@ -5,7 +5,7 @@ from workshop import getWorkshopItems
 from time import sleep
 from json import loads as json_loads
 from requests import get as http_get
-from utils import Timeout, get_default_ip
+from utils import Timeout, get_default_ip, get_default_port
 from a2s import info as a2s_info
 from select import select
 from threading import Thread
@@ -47,6 +47,9 @@ class ServerProcess:
 
         if self.ip == "0.0.0.0":
             self.ip = get_default_ip()
+
+        if self.port == 0:
+            self.port = get_default_port()
 
         fh = open(path.join(self.folder, "garrysmod/sa_config/api.json"))
         data = fh.read()
