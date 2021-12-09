@@ -1,4 +1,3 @@
-from socket import timeout
 from git import GitRepo
 from subprocess import call
 from server import ServerProcess

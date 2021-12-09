@@ -1,5 +1,5 @@
 from os import chdir, path, O_NONBLOCK, read, write, close
-from subprocess import PIPE, Popen, call, check_output
+from subprocess import Popen, call, check_output
 from tempfile import NamedTemporaryFile
 from workshop import getWorkshopItems
 from time import sleep
