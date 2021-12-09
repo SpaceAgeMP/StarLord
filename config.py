@@ -34,6 +34,7 @@ class ServerConfig:
         self.workshop_clients = None
         self.workshop_server = None
         self.gamemode = None
+        self.restart_every = None
 
     def defaults(self):
         self.tickrate = 60

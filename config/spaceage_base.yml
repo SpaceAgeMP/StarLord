@@ -7,6 +7,7 @@ server:
   workshop_clients: "177294269"
   workshop_server: "2371557248"
   gamemode: "spaceage"
+  restart_every: "24h"
 addons:
 - name: SpaceAge
   private: yes

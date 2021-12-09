@@ -9,6 +9,8 @@ from threading import Thread, Event
 from sys import stdin
 from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1, SIGUSR2, signal
 
+from timeutils import parse_timedelta
+
 FOLDER = path.abspath(path.dirname(__file__))
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git")
 
@@ -95,8 +97,18 @@ def stdinChecker():
     for line in stdin:
         server.exec(line.strip())
 
+def restartTimer():
+    if not config.server.restart_every:
+        return
+    timedelta = parse_timedelta(config.server.restart_every)
+    sleep(timedelta.total_seconds())
+    server.restartIfEmpty()
+
 updateCheckerThread = Thread(target=updateChecker, name="Update checker")
 updateCheckerThread.start()
+
+restartTimerThread = Thread(target=restartTimer, name="Restart timer", daemon=True)
+restartTimerThread.start()
 
 if stdin.isatty():
     stdinThread = Thread(target=stdinChecker, name="STDIN reader", daemon=True)
