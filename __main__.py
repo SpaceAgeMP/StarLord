@@ -8,7 +8,7 @@ from os import listdir, path, getenv
 from time import sleep
 from threading import Thread, Event
 from sys import stdin
-from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1, signal
+from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1, SIGUSR2, signal
 
 FOLDER = path.abspath(path.dirname(__file__))
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git")
@@ -28,6 +28,10 @@ def fireUpdateChecker():
 def handleSigusr1(_a, _b):
     fireUpdateChecker()
 signal(SIGUSR1, handleSigusr1)
+
+def handleSigusr2(_a, _b):
+    server.restartIfEmpty()
+signal(SIGUSR2, handleSigusr2)
 
 def handleStopSignal(_a, _b):
     server.stop()
@@ -83,7 +87,7 @@ def updateChecker():
         print("Checking for updates...")
         hasUpdates = checkUpdates()
         if hasUpdates:
-            server.exec("restart_if_empty 1")
+            server.restartIfEmpty()
 
         updateCheckerEvent = Event()
         updateCheckerEvent.wait(timeout=600)

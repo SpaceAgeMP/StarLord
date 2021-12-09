@@ -194,6 +194,9 @@ quit
         self.timeout = Timeout(timeout, func)
         self.timeout.start()
 
+    def restartIfEmpty(self):
+        self.exec("restart_if_empty 1")
+
     def stop(self):
         if self.state == STATE_RUNNING:
             self.setStateWithKillTimeout(STATE_STOPPING, 15)
