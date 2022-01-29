@@ -3,6 +3,9 @@ from threading import Thread, Event
 from socket import socket, AF_INET, SOCK_DGRAM
 
 def get_default_ip():
+    envip = getenv("SRCDS_IP")
+    if envip:
+        return envip
     addr = ("8.8.8.8", 53)
     s = socket(AF_INET, SOCK_DGRAM)
     s.connect(addr)
