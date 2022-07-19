@@ -161,10 +161,9 @@ quit
         self.stdoutThread.start()
     
     def stdoutThreadFunc(self):
-        ins = [self.ptyMaster]
-        outs = []
         while self.running:
-            readable, _, _ = select(ins, outs, ins)
+            ins = [self.ptyMaster]
+            readable, _, _ = select(ins, [], ins)
             for fd in readable:
                 try:
                     data = read(fd, 8192).decode('utf-8')
@@ -226,6 +225,10 @@ quit
         if self.ptySlave:
             close(self.ptySlave)
             self.ptySlave = None
+
+        if self.stdoutThread:
+            self.stdoutThread.join()
+            self.stdoutThread = None
 
     def exec(self, cmd):
         if not self.proc:
