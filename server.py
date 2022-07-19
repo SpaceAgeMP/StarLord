@@ -267,6 +267,9 @@ quit
             proto = None
             sock = None
             for line in lsof:
+                if len(line) < 2:
+                    continue
+
                 typ = line[0]
                 data = line[1:].strip()
                 if typ == "P":
