@@ -1,6 +1,7 @@
 from os import chdir, path, O_NONBLOCK, read, write, close
 from subprocess import Popen, check_call, check_output
 from tempfile import NamedTemporaryFile
+from traceback import print_exc
 from workshop import getWorkshopItems
 from time import sleep
 from json import loads as json_loads
@@ -165,8 +166,11 @@ quit
         while self.running:
             readable, _, _ = select(ins, outs, ins)
             for fd in readable:
-                data = read(fd, 8192).decode('utf-8')
-                self.onOutput(data)
+                try:
+                    data = read(fd, 8192).decode('utf-8')
+                    self.onOutput(data)
+                except:
+                    print_exc()
 
     def onOutput(self, data):
         stdout.write(data)
