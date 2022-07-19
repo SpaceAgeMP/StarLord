@@ -1,5 +1,5 @@
 from os import chdir, path, O_NONBLOCK, read, write, close
-from subprocess import Popen, call, check_output
+from subprocess import Popen, check_call, check_output
 from tempfile import NamedTemporaryFile
 from workshop import getWorkshopItems
 from time import sleep
@@ -109,7 +109,7 @@ quit
         tmpFile.write(steamcmdScript)
         tmpFile.flush()
         try:
-            call(["steamcmd", "+runscript", tmpFile.name])
+            check_call(["steamcmd", "+runscript", tmpFile.name])
         finally:
             tmpFile.close()
 

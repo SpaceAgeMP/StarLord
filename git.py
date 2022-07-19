@@ -1,4 +1,4 @@
-from subprocess import call, check_output
+from subprocess import check_call, check_output
 from os import path
 
 class GitRepo:
@@ -15,19 +15,19 @@ class GitRepo:
             return True
 
         if not offline:
-            call(["git", "-C", self.folder, "remote", "set-url", "origin", self.repo])
+            check_call(["git", "-C", self.folder, "remote", "set-url", "origin", self.repo])
             try:
-                call(["git", "-C", self.folder, "fetch", "origin"])
+                check_call(["git", "-C", self.folder, "fetch", "origin"])
             except:
                 pass
 
         return self._rev_parse("HEAD") != self._rev_parse("origin/%s" % self.branch)
 
     def _clone(self):
-        call(["git", "clone", self.repo, self.folder])
+        check_call(["git", "clone", self.repo, self.folder])
 
     def _update(self):
-        call(["git", "-C", self.folder, "reset", "--hard", "origin/%s" % self.branch])
+        check_call(["git", "-C", self.folder, "reset", "--hard", "origin/%s" % self.branch])
 
     def update(self):
         if path.exists(self.folder):

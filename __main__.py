@@ -1,5 +1,5 @@
 from git import GitRepo
-from subprocess import call
+from subprocess import check_call
 from server import ServerProcess
 from addon import Addon, isAddonUsed, isDLLUsed, isGamemodeUsed
 from config import load
@@ -70,7 +70,7 @@ def cleanupFolder(folder, checkfn):
             toDeleteList.append(path.join(folder, file))
 
     for toDelete in toDeleteList:
-        call(["rm", "-rf", toDelete])
+        check_call(["rm", "-rf", toDelete])
 
 def cleanupFolders():
     server.switchTo()
