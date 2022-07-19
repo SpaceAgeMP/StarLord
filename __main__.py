@@ -3,13 +3,16 @@ from subprocess import check_call
 from server import ServerProcess
 from addon import Addon, isAddonUsed, isDLLUsed, isGamemodeUsed
 from config import load
-from os import listdir, path, getenv
+from os import listdir, path, getenv, waitpid, WNOHANG
 from time import sleep
 from threading import Thread, Event
 from sys import stdin
-from signal import SIGINT, SIGTERM, SIGHUP, SIGUSR1, SIGUSR2, signal
-
+from signal import SIGCHLD, SIGINT, SIGTERM, SIGHUP, SIGUSR1, SIGUSR2, signal
 from timeutils import parse_timedelta
+
+def handleSIGCHLD(_a, _b):
+    waitpid(-1, WNOHANG)
+signal(SIGCHLD, handleSIGCHLD)
 
 FOLDER = path.abspath(path.dirname(__file__))
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git")
