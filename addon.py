@@ -22,8 +22,9 @@ class Addon:
             self.repo = "git@github.com:SpaceAgeMP/%s" % config.name
         else:
             self.repo = "https://github.com/SpaceAgeMP/%s" % config.name
+        self.branch = config.branch
         self.trusted = config.trusted
-        self.git = GitRepo(self.folder, self.repo)
+        self.git = GitRepo(self.folder, self.repo, self.branch)
 
     def checkUpdate(self, offline=False):
         return self.git.checkUpdate(offline)

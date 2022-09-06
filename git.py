@@ -2,10 +2,10 @@ from subprocess import check_call, check_output
 from os import path
 
 class GitRepo:
-    def __init__(self, folder, repo):
+    def __init__(self, folder, repo, branch):
         self.folder = folder
         self.repo = repo
-        self.branch = "master"
+        self.branch = branch
 
     def _rev_parse(self, rev):
         return check_output(["git", "-C", self.folder, "rev-parse", rev]).strip()
