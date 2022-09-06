@@ -15,7 +15,7 @@ def handleSIGCHLD(_a, _b):
 signal(SIGCHLD, handleSIGCHLD)
 
 FOLDER = path.abspath(path.dirname(__file__))
-selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git")
+selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git", "main")
 
 config = load(getenv("STARLORD_CONFIG"))
 
