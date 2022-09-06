@@ -21,7 +21,10 @@ addons:
 - name: smartsnap
 - name: wire-extras
   repo: https://github.com/wiremod/wire-extras
+  branch: master
 - name: lua_reloadent
   repo: https://github.com/TomyLobo/lua_reloadent
+  branch: master
 - name: sentry
   repo: https://github.com/Lexicality/gmod-sentry
+  branch: master
