@@ -9,6 +9,7 @@ from threading import Thread, Event
 from sys import stdin
 from signal import SIGCHLD, SIGINT, SIGTERM, SIGHUP, SIGUSR1, SIGUSR2, signal
 from timeutils import parse_timedelta
+from traceback import print_exception
 
 def handleSIGCHLD(_a, _b):
     waitpid(-1, WNOHANG)
@@ -89,9 +90,13 @@ def updateChecker():
     global updateCheckerEvent
     while server.running:
         print("Checking for updates...")
-        hasUpdates = checkUpdates()
-        if hasUpdates:
-            server.restartIfEmpty()
+        try:
+            hasUpdates = checkUpdates()
+            if hasUpdates:
+                server.restartIfEmpty()
+        except Exception as e:
+            print("Error checking for updates")
+            print_exception(e)
 
         updateCheckerEvent = Event()
         updateCheckerEvent.wait(timeout=600)
