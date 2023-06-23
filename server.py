@@ -1,4 +1,4 @@
-from os import chdir, path, O_NONBLOCK, read, write, close
+from os import chdir, path, O_NONBLOCK, read, write, close, getenv
 from subprocess import Popen, check_call, check_output
 from tempfile import NamedTemporaryFile
 from traceback import print_exc
@@ -26,6 +26,8 @@ STATE_FAILING = 5
 
 LOADADDONS_FILE_GMOD = "autorun/server/loadaddons.lua"
 LOADADDONS_FILE_SERVER = "garrysmod/lua/%s" % LOADADDONS_FILE_GMOD
+
+LD_LIBRARY_PATHS = ["./linux64", "./bin/linux64"]
 
 class ServerProcess:
     def __init__(self, folder, config):
@@ -145,7 +147,8 @@ quit
             args.append(self.config.workshop_server)
 
         env = {
-            "LD_LIBRARY_PATH": path.abspath("./bin/linux64"),
+            "LD_LIBRARY_PATH": ":".join([path.abspath(p) for p in LD_LIBRARY_PATHS]),
+            "HOME": getenv("HOME"),
         }
 
         self.kill()
