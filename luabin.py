@@ -88,7 +88,13 @@ class GithubReleaseLuaBin(LuaBin):
         self.save()
 
     def checkUpdate(self, offline=False):
-        return not self.isReleaseInstalled(self.queryLatestRelease())
+        if offline:
+            release = self.storage.get("release",  None)
+            if release is None:
+                return True
+        else:
+            release = self.queryLatestRelease()
+        return self.isReleaseInstalled(release)
 
     def update(self):
         release = self.storage.get("release",  None)
