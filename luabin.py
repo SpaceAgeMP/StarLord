@@ -82,11 +82,7 @@ class GithubReleaseLuaBin(LuaBin):
         self.save()
 
     def checkUpdate(self, offline=False):
-        try:
-            release = self.queryLatestRelease()
-        except HTTPError:
-            return False
-        return not self.isReleaseInstalled(release)
+        return not self.isReleaseInstalled(self.queryLatestRelease())
 
     def update(self):
         try:

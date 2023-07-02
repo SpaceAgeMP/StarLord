@@ -57,15 +57,30 @@ def runUpdates():
     server.switchTo()
     for addon in addons:
         print("Updating", addon)
-        addon.update()
+        try:
+            addon.update()
+        except Exception as e:
+            print_exception(e)
 
 def checkUpdates():
-    hasUpdates = selfRepo.checkUpdate()
-    selfRepo.update()
+    hasUpdates = False
+    try:
+        hasUpdates = selfRepo.checkUpdate()
+        selfRepo.update()
+    except Exception as e:
+        print_exception(e)
+
     for addon in addons:
-        if addon.checkUpdate():
-            hasUpdates = True
-    server.updateWorkshopLua()
+        try:
+            if addon.checkUpdate():
+                hasUpdates = True
+        except Exception as e:
+            print_exception(e)
+
+    try:
+        server.updateWorkshopLua()
+    except Exception as e:
+        print_exception(e)
     return hasUpdates
 
 def cleanupFolder(folder, checkfn):
