@@ -23,10 +23,14 @@ class AddonConfig:
         self.repo = None
         self.private = None
         self.branch = None
+        self.trusted = None
+        self.gamemodes = None
 
     def defaults(self):
         self.private = False
+        self.trusted = False
         self.branch = "main"
+        self.gamemodes = []
 
 class LuaBinConfig:
     def __init__(self):

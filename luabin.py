@@ -4,16 +4,13 @@ from os.path import join
 from traceback import print_exception
 from requests import get as http_get
 from config import LuaBinConfig
-from requests.exceptions import HTTPError
+from updateable import UpdateableResource
 
 usedDLLs = set()
 
-class LuaBin:
-    name: str
-
+class LuaBin(UpdateableResource):
     def __init__(self, folder, name):
-        self.folder = folder
-        self.name = name
+        super().__init__(folder, name)
         self.load()
 
     def load(self):

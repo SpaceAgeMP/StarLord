@@ -1,14 +1,13 @@
 from subprocess import check_call, check_output
 from os import path
+from updateable import UpdateableResource
 
-class GitRepo:
+class GitRepo(UpdateableResource):
     def __init__(self, folder, repo, branch):
-        self.folder = folder
+        super().__init__(folder, repo)
+
         self.repo = repo
         self.branch = branch
-
-    def _rev_parse(self, rev):
-        return check_output(["git", "-C", self.folder, "rev-parse", rev]).strip()
 
     def checkUpdate(self, offline=False):
         if not path.exists(self.folder):
@@ -24,3 +23,6 @@ class GitRepo:
         if not path.exists(self.folder):
             check_call(["git", "clone", self.repo, self.folder])
         check_call(["git", "-C", self.folder, "reset", "--hard", "origin/%s" % self.branch])
+
+    def _rev_parse(self, rev):
+        return check_output(["git", "-C", self.folder, "rev-parse", rev]).strip()

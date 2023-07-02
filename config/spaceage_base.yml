@@ -11,8 +11,13 @@ server:
 addons:
 - name: SpaceAge
   private: yes
+  trusted: yes
+  gamemodes:
+    - spaceage
 - name: sbep
 - name: spacebuild
+  gamemodes:
+    - spacebuild
 - name: multi-parent
 - name: physgun-build-mode
 - name: Falcos-Prop-protection
