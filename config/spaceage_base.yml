@@ -11,7 +11,6 @@ server:
 addons:
 - name: SpaceAge
   private: yes
-  trusted: yes
 - name: sbep
 - name: spacebuild
 - name: multi-parent
@@ -28,3 +27,19 @@ addons:
 - name: sentry
   repo: https://github.com/Lexicality/gmod-sentry
   branch: master
+luabins:
+- name: luaerror
+  type: github_release
+  config:
+    org: SpaceAgeMP
+    name: gm_luaerror
+- name: random
+  type: github_release
+  config:
+    org: SpaceAgeMP
+    name: gmsv_random
+- name: gwsockets
+  type: github_release
+  config:
+    org: SpaceAgeMP
+    name: GWSockets

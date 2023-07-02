@@ -43,17 +43,6 @@ class Addon:
             symlink("../../%s" % gamemodeFolder, link, False)
             usedGamemodes.add(self.nameLower)
 
-        binFolder = "%s/lua/bin" % self.folder
-        if self.trusted and path.exists(binFolder):
-            gameBinFolder = "garrysmod/lua/bin"
-            if not path.exists(gameBinFolder):
-                mkdir(gameBinFolder)
-            for dll in listdir(binFolder):
-                dllLink = "%s/%s" % (gameBinFolder, dll)
-                unlink_safe(dllLink)
-                symlink("../../../%s/%s" % (binFolder, dll), dllLink, False)
-                usedDLLs.add(dll)
-
         cfgFolder = "%s/cfg" % self.folder
         if self.trusted and path.exists(cfgFolder):
             gameCfgFolder = "garrysmod/cfg"

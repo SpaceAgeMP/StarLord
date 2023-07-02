@@ -2,6 +2,7 @@ from git import GitRepo
 from subprocess import check_call
 from server import ServerProcess
 from addon import Addon, isAddonUsed, isDLLUsed, isGamemodeUsed
+from luabin import makeLuaBin
 from config import load
 from os import listdir, path, getenv, waitpid, WNOHANG
 from time import sleep
@@ -48,6 +49,9 @@ addons = []
 for addonCfg in config.addons:
     addons.append(Addon(addonCfg))
 
+for luaBinCfg in config.luabins:
+    addons.append(makeLuaBin("garrysmod/lua/bin", luaBinCfg))
+
 def runUpdates():
     server.updateBin()
     server.switchTo()
@@ -56,8 +60,7 @@ def runUpdates():
 
 def checkUpdates():
     hasUpdates = selfRepo.checkUpdate()
-    if hasUpdates:
-        selfRepo.update()
+    selfRepo.update()
     for addon in addons:
         if addon.checkUpdate():
             hasUpdates = True

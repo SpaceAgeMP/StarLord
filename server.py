@@ -29,6 +29,8 @@ LOADADDONS_FILE_SERVER = "garrysmod/lua/%s" % LOADADDONS_FILE_GMOD
 
 LD_LIBRARY_PATHS = ["./linux64", "./bin/linux64"]
 
+# gmsv_luaerror_osx.dll gmsv_luaerror_osx64.dll gmsv_luaerror_win32.dll
+
 class ServerProcess:
     def __init__(self, folder, config):
         self.folder = path.abspath(folder)
