@@ -113,6 +113,11 @@ def load(config):
             addonCfg = AddonConfig()
             merge_object(addonCfg, addon)
             cfg.addons.append(addonCfg)
+        for luabin in nextCfg.luabins:
+            luaBinCfg = LuaBinConfig()
+            merge_object(luaBinCfg, luabin)
+            cfg.luabins.append(luaBinCfg)
+
     cfg.inherit = None
 
     return cfg
