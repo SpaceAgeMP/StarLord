@@ -72,22 +72,27 @@ class GithubReleaseLuaBin(LuaBin):
     def queryLatestRelease(self):
         res = http_get(url=f"https://api.github.com/repos/{self.repo_org}/{self.repo_name}/releases/latest")
         res.raise_for_status()
-        return json_loads(res.text)
+
+        release = json_loads(res.text)
+
+        self.storage["release"] = release
+        self.save()
+
+        return release
 
     def isReleaseInstalled(self, release):
-        return release["tag_name"] == self.storage.get("installed_tag_name", "")
+        return release["tag_name"] == self.storage.get("tag_name", "")
         
     def storeRelease(self, release):
-        self.storage = release
-        self.storage["installed_tag_name"] = release["tag_name"]
+        self.storage["tag_name"] = release["tag_name"]
         self.save()
 
     def checkUpdate(self, offline=False):
         return not self.isReleaseInstalled(self.queryLatestRelease())
 
     def update(self):
-        release = self.storage
-        if "tag_name" not in release:
+        release = self.storage.get("release",  None)
+        if release is None:
             release = self.queryLatestRelease()
 
         if self.isReleaseInstalled(release):
