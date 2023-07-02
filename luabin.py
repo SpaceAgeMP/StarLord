@@ -80,6 +80,9 @@ class GithubReleaseLuaBin(LuaBin):
         self.save()
 
     def checkUpdate(self, offline=False):
+        binary_name = self.makeBinaryName()
+        usedDLLs.add(binary_name)
+
         return not self.isReleaseInstalled(self.queryLatestRelease())
 
     def update(self):
