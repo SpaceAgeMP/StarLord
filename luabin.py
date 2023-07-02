@@ -36,7 +36,7 @@ class LuaBin:
 
     def makeBinaryName(self):
         arch_suffix = ""
-        if architecture()[0] == 64:
+        if architecture()[0] == "64bit":
             arch_suffix = "64"
 
         system_name = system()
