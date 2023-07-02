@@ -3,6 +3,7 @@ from json import loads as json_loads, load as json_load, dump as json_dump
 from os.path import join
 from traceback import print_exception
 from requests import get as http_get
+from config import LuaBinConfig
 
 usedDLLs = set()
 
@@ -98,11 +99,11 @@ class GithubReleaseLuaBin(LuaBin):
 
         self.storeRelease(release)
 
-def makeLuaBin(folder, config):
-    if config["type"] == "github_release":
-        return GithubReleaseLuaBin(folder, config["name"], config["config"])
+def makeLuaBin(folder, config: LuaBinConfig):
+    if config.type == "github_release":
+        return GithubReleaseLuaBin(folder, config.name, config.config)
     else:
-        raise ValueError(f"{config['type']} is an invalid LuaBin type")
+        raise ValueError(f"{config.type} is an invalid LuaBin type")
 
 def isDLLUsed(dll):
     return dll in usedDLLs
