@@ -85,8 +85,8 @@ def cleanupFolders():
     cleanupFolder("garrysmod/addons", isAddonUsed)
     cleanupFolder("garrysmod/lua/bin", isDLLUsed)
 
-runUpdates()
 cleanupFolders()
+runUpdates()
 server.run()
 
 def updateChecker():
