@@ -90,6 +90,7 @@ class GithubReleaseLuaBin(LuaBin):
 
         url = None
         for asset in release["assets"]:
+            print(asset["name"], binary_name, asset)
             if asset["name"] == binary_name:
                 url = asset["browser_download_url"]
                 break
