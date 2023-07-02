@@ -22,12 +22,10 @@ class AddonConfig:
         self.name = None
         self.repo = None
         self.private = None
-        self.trusted = None
         self.branch = None
 
     def defaults(self):
         self.private = False
-        self.trusted = False
         self.branch = "main"
 
 class LuaBinConfig:
