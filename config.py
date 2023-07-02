@@ -8,11 +8,14 @@ class Config:
         self.inherit = None
         self.server = ServerConfig()
         self.addons = []
+        self.luabins = []
 
     def defaults(self):
         self.server.defaults()
         for addon in self.addons:
             addon.defaults()
+        for luabin in self.luabins:
+            luabin.defaults()
 
 class AddonConfig:
     def __init__(self):
@@ -26,6 +29,15 @@ class AddonConfig:
         self.private = False
         self.trusted = False
         self.branch = "main"
+
+class LuaBinConfig:
+    def __init__(self):
+        self.name = None
+        self.type = None
+        self.config = None
+
+    def defaults(self):
+        self.config = {}
 
 class ServerConfig:
     def __init__(self):
@@ -60,6 +72,11 @@ def obj_to_config(dict):
             ac = AddonConfig()
             ac.defaults()
             cfg.addons.append(dict_to_obj(addon, ac))
+    if "luabins" in dict:
+        for luabin in dict["luabins"]:
+            lbc = LuaBinConfig()
+            lbc.defaults()
+            cfg.luabins.append(dict_to_obj(luabin, lbc))
     if "server" in dict:
         cfg.server = dict_to_obj(dict["server"], ServerConfig())
     return cfg
