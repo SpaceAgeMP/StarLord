@@ -42,7 +42,7 @@ luabins:
   type: github_release
   config:
     org: SpaceAgeMP
-    name: gmsv_random
+    name: gm_random
 - name: gwsockets
   type: github_release
   config:

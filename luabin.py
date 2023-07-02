@@ -44,6 +44,8 @@ class LuaBin(UpdateableResource):
 
         platform_suffix = ""
         if system_name == "Windows":
+            # Windows is the only platform with a 32-bit suffix
+            # for some reason, thanks GMod
             if arch_suffix == "":
                 arch_suffix = "32"
             platform_suffix = "win"
