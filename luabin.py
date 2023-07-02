@@ -82,7 +82,7 @@ class GithubReleaseLuaBin(LuaBin):
 
     def update(self):
         binary_name = self.makeBinaryName()
-        usedDLLs.append(binary_name)
+        usedDLLs.add(binary_name)
 
         release = self.queryLatestRelease()
         if self.isReleaseInstalled(release):
