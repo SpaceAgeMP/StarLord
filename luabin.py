@@ -16,8 +16,10 @@ class LuaBin:
         self.load()
 
     def load(self):
+        usedDLLs.add(self.makeBinaryName())
+        usedDLLs.add(self.makeMetaName())
+
         file = self.formatPath(self.makeMetaName())
-        usedDLLs.add(file)
         try:
             with open(file, "r") as f:
                 self.storage = json_load(f)
@@ -29,7 +31,6 @@ class LuaBin:
 
     def save(self):
         file = self.formatPath(self.makeMetaName())
-        usedDLLs.add(file)
         with open(file, "w") as f:
             json_dump(self.storage, f)
         
@@ -80,20 +81,15 @@ class GithubReleaseLuaBin(LuaBin):
         self.save()
 
     def checkUpdate(self, offline=False):
-        binary_name = self.makeBinaryName()
-        usedDLLs.add(binary_name)
-
         return not self.isReleaseInstalled(self.queryLatestRelease())
 
     def update(self):
-        binary_name = self.makeBinaryName()
-        usedDLLs.add(binary_name)
-
         release = self.queryLatestRelease()
         if self.isReleaseInstalled(release):
             return
 
         url = None
+        binary_name = self.makeBinaryName()
         for asset in release["assets"]:
             print(asset["name"], binary_name, asset)
             if asset["name"] == binary_name:
