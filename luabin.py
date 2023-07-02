@@ -20,6 +20,8 @@ class LuaBin:
         try:
             with open(file, "r") as f:
                 self.storage = json_load(f)
+        except FileNotFoundError as e:
+            self.storage = {}
         except Exception as e:
             print_exception(e)
             self.storage = {}
