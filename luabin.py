@@ -29,7 +29,7 @@ class LuaBin:
     def save(self):
         file = self.formatPath(self.makeMetaName())
         with open(file, "w") as f:
-            f.write(json_dump(self.storage))
+            json_dump(self.storage, f.write())
         
     def formatPath(self, name):
         return join(self.folder, name)
