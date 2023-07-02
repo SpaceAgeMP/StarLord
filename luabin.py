@@ -4,6 +4,8 @@ from os.path import join
 from traceback import print_exception
 from requests import get as http_get
 
+usedDLLs = set()
+
 class LuaBin:
     name: str
 
@@ -76,12 +78,14 @@ class GithubReleaseLuaBin(LuaBin):
         return not self.isReleaseInstalled(self.queryLatestRelease())
 
     def update(self):
+        binary_name = self.makeBinaryName()
+        usedDLLs.append(binary_name)
+
         release = self.queryLatestRelease()
         if self.isReleaseInstalled(release):
             return
 
         url = None
-        binary_name = self.makeBinaryName()
         for asset in release["assets"]:
             if asset.name == binary_name:
                 url = asset["browser_download_url"]
@@ -99,3 +103,6 @@ def makeLuaBin(folder, config):
         return GithubReleaseLuaBin(folder, config["name"], config["config"])
     else:
         raise ValueError(f"{config['type']} is an invalid LuaBin type")
+
+def isDLLUsed(dll):
+    return dll in usedDLLs

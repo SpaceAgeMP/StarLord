@@ -3,7 +3,6 @@ from os import mkdir, path, symlink, listdir
 from utils import unlink_safe
 from shutil import copyfile
 
-usedDLLs = set()
 usedGamemodes = set()
 usedAddons = set()
 
@@ -52,8 +51,6 @@ class Addon:
                 print(cfgFolder, gameCfgFolder, cfg)
                 copyfile("%s/%s" % (cfgFolder, cfg), "%s/%s" % (gameCfgFolder, cfg))
 
-def isDLLUsed(dll):
-    return dll in usedDLLs
 
 def isGamemodeUsed(gamemode):
     return gamemode in usedGamemodes

@@ -1,8 +1,8 @@
 from git import GitRepo
 from subprocess import check_call
 from server import ServerProcess
-from addon import Addon, isAddonUsed, isDLLUsed, isGamemodeUsed
-from luabin import makeLuaBin
+from addon import Addon, isAddonUsed, isGamemodeUsed
+from luabin import makeLuaBin, isDLLUsed
 from config import load
 from os import listdir, path, getenv, waitpid, WNOHANG
 from time import sleep
@@ -85,8 +85,8 @@ def cleanupFolders():
     cleanupFolder("garrysmod/addons", isAddonUsed)
     cleanupFolder("garrysmod/lua/bin", isDLLUsed)
 
-cleanupFolders()
 runUpdates()
+cleanupFolders()
 server.run()
 
 def updateChecker():
