@@ -27,7 +27,6 @@ class GitRepo:
         check_call(["git", "-C", self.folder, "reset", "--hard", "origin/%s" % self.branch])
 
     def update(self):
-        if path.exists(self.folder):
-            self._update()
-        else:
+        if not path.exists(self.folder):
             self._clone()
+        self._update()
