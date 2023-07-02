@@ -70,11 +70,18 @@ class GithubReleaseLuaBin(LuaBin):
         self.repo_name = config["name"]
 
         if "tag" in config:
-            self.release = f"tags/{config['tag']}"
+            self.fixed_tag = config["tag"]
+            self.release = f"tags/{self.fixed_tag}"
         else:
+            self.fixed_tag = None
             self.release = "latest"
 
-    def queryLatestRelease(self):
+    def queryReleaseInfo(self):
+        if self.fixed_tag is not None:
+            release = self.storage.get("release", None)
+            if release is not None and release["tag_name"] == self.fixed_tag:
+                return release
+
         res = http_get(url=f"https://api.github.com/repos/{self.repo_org}/{self.repo_name}/releases/{self.release}")
         res.raise_for_status()
 
@@ -98,13 +105,13 @@ class GithubReleaseLuaBin(LuaBin):
             if release is None:
                 return True
         else:
-            release = self.queryLatestRelease()
+            release = self.queryReleaseInfo()
         return not self.isReleaseInstalled(release)
 
     def update(self):
         release = self.storage.get("release", None)
         if release is None:
-            release = self.queryLatestRelease()
+            release = self.queryReleaseInfo()
 
         if self.isReleaseInstalled(release):
             return
