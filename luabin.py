@@ -4,6 +4,7 @@ from os.path import join
 from traceback import print_exception
 from requests import get as http_get
 from config import LuaBinConfig
+from requests.exceptions import HTTPError
 
 usedDLLs = set()
 
@@ -81,10 +82,18 @@ class GithubReleaseLuaBin(LuaBin):
         self.save()
 
     def checkUpdate(self, offline=False):
-        return not self.isReleaseInstalled(self.queryLatestRelease())
+        try:
+            release = self.queryLatestRelease()
+        except HTTPError:
+            return False
+        return not self.isReleaseInstalled(release)
 
     def update(self):
-        release = self.queryLatestRelease()
+        try:
+            release = self.queryLatestRelease()
+        except HTTPError:
+            return
+
         if self.isReleaseInstalled(release):
             return
 
