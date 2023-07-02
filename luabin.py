@@ -69,8 +69,13 @@ class GithubReleaseLuaBin(LuaBin):
         self.repo_org = config["org"]
         self.repo_name = config["name"]
 
+        if "tag" in config:
+            self.release = f"tags/{config['tag']}"
+        else:
+            self.release = "latest"
+
     def queryLatestRelease(self):
-        res = http_get(url=f"https://api.github.com/repos/{self.repo_org}/{self.repo_name}/releases/latest")
+        res = http_get(url=f"https://api.github.com/repos/{self.repo_org}/{self.repo_name}/releases/{self.release}")
         res.raise_for_status()
 
         release = json_loads(res.text)
