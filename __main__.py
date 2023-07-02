@@ -64,19 +64,25 @@ def runUpdates():
 
 def checkUpdates():
     hasUpdates = False
+    print("Checking self")
     try:
         hasUpdates = selfRepo.checkUpdate()
+        if hasUpdates:
+            print("Update found for self")
         selfRepo.update()
     except Exception as e:
         print_exception(e)
 
     for addon in addons:
+        print("Checking addon", addon)
         try:
             if addon.checkUpdate():
+                print("Update found for addon", addon)
                 hasUpdates = True
         except Exception as e:
             print_exception(e)
 
+    print("Checking workshop")
     try:
         server.updateWorkshopLua()
     except Exception as e:
