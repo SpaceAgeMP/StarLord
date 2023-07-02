@@ -58,8 +58,8 @@ class GithubReleaseLuaBin(LuaBin):
     repo_org: str
     repo_name: str
 
-    def __init__(self, name, folder, config):
-        super().__init__(self, name, folder)
+    def __init__(self, folder, name, config):
+        super().__init__(folder, name)
         self.repo_org = config["org"]
         self.repo_name = config["name"]
 
