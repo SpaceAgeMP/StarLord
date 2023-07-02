@@ -81,6 +81,7 @@ class GithubReleaseLuaBin(LuaBin):
         return release
 
     def isReleaseInstalled(self, release):
+        print(release["tag_name"], self.storage.get("tag_name", ""), release["tag_name"] == self.storage.get("tag_name", ""))
         return release["tag_name"] == self.storage.get("tag_name", "")
         
     def storeRelease(self, release):
@@ -89,7 +90,7 @@ class GithubReleaseLuaBin(LuaBin):
 
     def checkUpdate(self, offline=False):
         if offline:
-            release = self.storage.get("release",  None)
+            release = self.storage.get("release", None)
             if release is None:
                 return True
         else:
@@ -97,7 +98,7 @@ class GithubReleaseLuaBin(LuaBin):
         return self.isReleaseInstalled(release)
 
     def update(self):
-        release = self.storage.get("release",  None)
+        release = self.storage.get("release", None)
         if release is None:
             release = self.queryLatestRelease()
 
