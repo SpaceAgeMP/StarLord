@@ -56,6 +56,7 @@ def runUpdates():
     server.updateBin()
     server.switchTo()
     for addon in addons:
+        print("Updating", addon)
         addon.update()
 
 def checkUpdates():
