@@ -75,17 +75,21 @@ class GithubReleaseLuaBin(LuaBin):
         return json_loads(res.text)
 
     def isReleaseInstalled(self, release):
-        return release["tag_name"] == self.storage.get("tag_name", "")
+        return release["tag_name"] == self.storage.get("installed_tag_name", "")
         
     def storeRelease(self, release):
-        self.storage["tag_name"] = release["tag_name"]
+        self.storage = release
+        self.storage["installed_tag_name"] = release["tag_name"]
         self.save()
 
     def checkUpdate(self, offline=False):
         return not self.isReleaseInstalled(self.queryLatestRelease())
 
     def update(self):
-        release = self.queryLatestRelease()
+        release = self.storage
+        if "tag_name" not in release:
+            release = self.queryLatestRelease()
+
         if self.isReleaseInstalled(release):
             return
 
