@@ -17,6 +17,7 @@ class LuaBin:
 
     def load(self):
         file = self.formatPath(self.makeMetaName())
+        usedDLLs.add(file)
         try:
             with open(file, "r") as f:
                 self.storage = json_load(f)
@@ -28,6 +29,7 @@ class LuaBin:
 
     def save(self):
         file = self.formatPath(self.makeMetaName())
+        usedDLLs.add(file)
         with open(file, "w") as f:
             json_dump(self.storage, f)
         
