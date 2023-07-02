@@ -78,7 +78,7 @@ class GithubReleaseLuaBin(LuaBin):
         return release["tag_name"] == self.storage.get("tag_name", "")
         
     def storeRelease(self, release):
-        self.storage["tag_name"] = release
+        self.storage["tag_name"] = release["tag_name"]
         self.save()
 
     def checkUpdate(self, offline=False):
