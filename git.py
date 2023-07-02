@@ -16,10 +16,7 @@ class GitRepo:
 
         if not offline:
             check_call(["git", "-C", self.folder, "remote", "set-url", "origin", self.repo])
-            try:
-                check_call(["git", "-C", self.folder, "fetch", "origin"])
-            except:
-                pass
+            check_call(["git", "-C", self.folder, "fetch", "origin"])
 
         return self._rev_parse("HEAD") != self._rev_parse("origin/%s" % self.branch)
 
