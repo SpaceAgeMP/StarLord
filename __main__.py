@@ -98,8 +98,7 @@ def cleanupFolder(folder, checkfn):
         if not checkfn(file):
             toDeleteList.append(path.join(folder, file))
 
-    for toDelete in toDeleteList:
-        check_call(["rm", "-rf", toDelete])
+    check_call(["rm", "-rf"] + toDeleteList)
 
 def cleanupFolders():
     server.switchTo()
