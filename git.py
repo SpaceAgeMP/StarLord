@@ -20,13 +20,7 @@ class GitRepo:
 
         return self._rev_parse("HEAD") != self._rev_parse("origin/%s" % self.branch)
 
-    def _clone(self):
-        check_call(["git", "clone", self.repo, self.folder])
-
-    def _update(self):
-        check_call(["git", "-C", self.folder, "reset", "--hard", "origin/%s" % self.branch])
-
     def update(self):
         if not path.exists(self.folder):
-            self._clone()
-        self._update()
+            check_call(["git", "clone", self.repo, self.folder])
+        check_call(["git", "-C", self.folder, "reset", "--hard", "origin/%s" % self.branch])
