@@ -5,6 +5,7 @@ from traceback import print_exception
 from requests import get as http_get
 from config import LuaBinConfig
 from updateable import UpdateableResource
+from typing import Optional
 
 usedDLLs = set()
 
@@ -75,10 +76,13 @@ class GithubReleaseLuaBin(LuaBin):
             self.fixed_tag = None
             self.release = "latest"
 
-    def queryReleaseInfo(self):
-        if self.fixed_tag is not None:
+    def queryReleaseInfo(self, use_release: Optional[str] = None):
+        if use_release is None:
+            use_release = self.fixed_tag
+
+        if use_release is not None:
             release = self.storage.get("release", None)
-            if release is not None and release["tag_name"] == self.fixed_tag:
+            if release is not None and release["tag_name"] == use_release:
                 return release
 
         res = http_get(url=f"https://api.github.com/repos/{self.repo_org}/{self.repo_name}/releases/{self.release}")
@@ -98,6 +102,13 @@ class GithubReleaseLuaBin(LuaBin):
         self.storage["tag_name"] = release["tag_name"]
         self.save()
 
+    def getBinaryURL(self, release):
+        binary_name = self.makeBinaryName()
+        for asset in release["assets"]:
+            if asset["name"] == binary_name:
+                return asset["browser_download_url"]
+        return None
+
     def checkUpdate(self, offline=False):
         if offline:
             release = self.storage.get("release", None)
@@ -105,7 +116,11 @@ class GithubReleaseLuaBin(LuaBin):
                 return True
         else:
             release = self.queryReleaseInfo()
-        return not self.isReleaseInstalled(release)
+
+        if self.isReleaseInstalled(release):
+            return False
+        print("Found update, but no binary, pointless to update")
+        return self.getBinaryURL(release) is not None
 
     def update(self):
         release = self.storage.get("release", None)
@@ -115,12 +130,10 @@ class GithubReleaseLuaBin(LuaBin):
         if self.isReleaseInstalled(release):
             return
 
-        url = None
-        binary_name = self.makeBinaryName()
-        for asset in release["assets"]:
-            if asset["name"] == binary_name:
-                url = asset["browser_download_url"]
-                break
+        url = self.getBinaryURL(release)
+        if url is None:
+            print("LuaBin manifest missing binaries, ignoring")
+            return
 
         resp = http_get(url=url, stream=True)
         resp.raise_for_status()
