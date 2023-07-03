@@ -119,8 +119,10 @@ class GithubReleaseLuaBin(LuaBin):
 
         if self.isReleaseInstalled(release):
             return False
-        print("Found update, but no binary, pointless to update")
-        return self.getBinaryURL(release) is not None
+        if self.getBinaryURL(release) is None:
+            print("Found update, but no binary, pointless to update")
+            return False
+        return True
 
     def update(self):
         release = self.storage.get("release", None)
