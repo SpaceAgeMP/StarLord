@@ -136,7 +136,7 @@ quit
             self.updateWorkshopLua()
 
         args = ["./bin/linux64/srcds",
-                    "-usercon", "-autoupdate", "-disableluarefresh", "-console",
+                    "-usercon", "-autoupdate", "-disableluarefresh", "-console", "-allowlocalhttp",
                     "+ip", self.ip, "-port", "%i" % self.port,
                     "-tickrate", "%i" % self.config.tickrate, "-game", "garrysmod", "+maxplayers", "%i" % self.config.maxplayers,
                     "+map", self.config.map, "+gamemode", self.config.gamemode
