@@ -23,6 +23,7 @@ addons:
 - name: Falcos-Prop-protection
 - name: Joystick
 - name: smartsnap
+- name: wire-cpu
 - name: wire-extras
   repo: https://github.com/wiremod/wire-extras
   branch: master
