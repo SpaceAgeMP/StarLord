@@ -3,26 +3,29 @@ from os import path
 from updateable import UpdateableResource
 
 class GitRepo(UpdateableResource):
-    def __init__(self, folder, repo, branch):
+    repo: str
+    branch: str
+
+    def __init__(self, folder: str, repo: str, branch: str):
         super().__init__(folder, repo)
 
         self.repo = repo
         self.branch = branch
 
-    def checkUpdate(self, offline=False):
+    def checkUpdate(self, offline: bool=False) -> bool:
         if not path.exists(self.folder):
             return True
 
         if not offline:
-            check_call(["git", "-C", self.folder, "remote", "set-url", "origin", self.repo])
-            check_call(["git", "-C", self.folder, "fetch", "origin"])
+            _ = check_call(["git", "-C", self.folder, "remote", "set-url", "origin", self.repo])
+            _ = check_call(["git", "-C", self.folder, "fetch", "origin"])
 
         return self._rev_parse("HEAD") != self._rev_parse("origin/%s" % self.branch)
 
     def update(self):
         if not path.exists(self.folder):
-            check_call(["git", "clone", self.repo, self.folder])
-        check_call(["git", "-C", self.folder, "reset", "--hard", "origin/%s" % self.branch])
+            _ = check_call(["git", "clone", self.repo, self.folder])
+        _ = check_call(["git", "-C", self.folder, "reset", "--hard", "origin/%s" % self.branch])
 
-    def _rev_parse(self, rev):
+    def _rev_parse(self, rev: str):
         return check_output(["git", "-C", self.folder, "rev-parse", rev]).strip()

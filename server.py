@@ -7,12 +7,14 @@ from time import sleep
 from json import loads as json_loads
 from requests import get as http_get
 from utils import Timeout, get_default_ip, get_default_port
-from a2s import info as a2s_info
+from a2s import info as a2s_info # type: ignore
 from select import select
 from threading import Thread
 from sys import stdout
 from pty import openpty
 from fcntl import fcntl, F_GETFL, F_SETFL
+from config import ServerConfig
+from typing import cast, Callable
 
 STREAM_STDOUT = 0
 STREAM_STDERR = 1
@@ -30,7 +32,12 @@ LOADADDONS_FILE_SERVER = "garrysmod/lua/%s" % LOADADDONS_FILE_GMOD
 LD_LIBRARY_PATHS = ["./linux64", "./bin/linux64"]
 
 class ServerProcess:
-    def __init__(self, folder, config):
+    folder: str
+    pidfile: str
+    ip: str
+
+    def __init__(self, folder: str, config: ServerConfig):
+        super().__init__()
         self.folder = path.abspath(folder)
 
         self.pidfile = path.join(self.folder, "pid")
@@ -80,7 +87,7 @@ hostname "SpaceAge [%s]"
 """ % (data["steam_account_token"], data["rcon_password"], data["name"])
 
         fh = open(path.join(self.folder, "garrysmod/cfg/localgame.cfg"), "w")
-        fh.write(localCfg)
+        _ = fh.write(localCfg)
         fh.close()
 
         localCfg = """
@@ -89,7 +96,7 @@ sentry.Setup("%s", {server_name = "%s"})
 """ % (data["sentry_dsn"], data["name"])
 
         fh = open(path.join(self.folder, "garrysmod/lua/autorun/server/localcfg.lua"), "w")
-        fh.write(localCfg)
+        _ = fh.write(localCfg)
         fh.close()
 
     def switchTo(self):
@@ -109,10 +116,10 @@ quit
 
         tmpFile = NamedTemporaryFile(mode="w+", suffix=".txt")
 
-        tmpFile.write(steamcmdScript)
+        _ = tmpFile.write(steamcmdScript)
         tmpFile.flush()
         try:
-            check_call(["steamcmd", "+runscript", tmpFile.name])
+            _ = check_call(["steamcmd", "+runscript", tmpFile.name])
         finally:
             tmpFile.close()
 
@@ -124,7 +131,7 @@ quit
             for item in getWorkshopItems(self.config.workshop_clients):
                 fileData += "resource.AddWorkshop(\"%s\")\n" % item
         fh = open(LOADADDONS_FILE_SERVER, "w")
-        fh.write(fileData)
+        _ = fh.write(fileData)
         fh.close()
 
         self.exec("lua_openscript %s" % LOADADDONS_FILE_GMOD)
@@ -135,7 +142,7 @@ quit
         if not path.exists(LOADADDONS_FILE_SERVER):
             self.updateWorkshopLua()
 
-        args = ["./bin/linux64/srcds",
+        args: list[str] = ["./bin/linux64/srcds",
                     "-usercon", "-autoupdate", "-disableluarefresh", "-console", "-allowlocalhttp",
                     "+ip", self.ip, "-port", "%i" % self.port,
                     "-tickrate", "%i" % self.config.tickrate, "-game", "garrysmod", "+maxplayers", "%i" % self.config.maxplayers,
@@ -146,9 +153,9 @@ quit
             args.append("+host_workshop_collection")
             args.append(self.config.workshop_server)
 
-        env = {
+        env: dict[str, str] = {
             "LD_LIBRARY_PATH": ":".join([path.abspath(p) for p in LD_LIBRARY_PATHS]),
-            "HOME": getenv("HOME"),
+            "HOME": cast(str, getenv("HOME")),
         }
 
         self.kill()
@@ -157,7 +164,7 @@ quit
 
         self.ptyMaster, self.ptySlave = openpty()
         fl = fcntl(self.ptyMaster, F_GETFL)
-        fcntl(self.ptyMaster, F_SETFL, fl | O_NONBLOCK)
+        _ = fcntl(self.ptyMaster, F_SETFL, fl | O_NONBLOCK)
 
         self.proc = Popen(args, env=env, bufsize=0, stdin=self.ptySlave, stdout=self.ptySlave, stderr=self.ptySlave, close_fds=True, encoding='utf-8')
         self.stdoutThread = Thread(target=self.stdoutThreadFunc, daemon=True, name="Server stdout")
@@ -174,15 +181,15 @@ quit
                 except:
                     print_exc()
 
-    def onOutput(self, data):
-        stdout.write(data)
+    def onOutput(self, data: str):
+        _ = stdout.write(data)
         stdout.flush()
 
-    def setStateWithKillTimeout(self, state, timeout):
+    def setStateWithKillTimeout(self, state: int, timeout: float):
         if self.setState(state):
             self.setStateTimeout(timeout, self.kill)
 
-    def setState(self, state):
+    def setState(self, state: int):
         if self.state == state:
             return False
         self.clearStateTimeout()
@@ -195,7 +202,7 @@ quit
             self.timeout.cancel()
             self.timeout = None
 
-    def setStateTimeout(self, timeout, func):
+    def setStateTimeout(self, timeout: float, func: Callable[[], None]):
         self.clearStateTimeout()
         self.timeout = Timeout(timeout, func)
         self.timeout.start()
@@ -212,7 +219,7 @@ quit
 
     def kill(self):
         self.running = False
-        self.setState(STATE_STOPPED)
+        _ = self.setState(STATE_STOPPED)
 
         if self.proc:
             try:
@@ -233,25 +240,25 @@ quit
             self.stdoutThread.join()
             self.stdoutThread = None
 
-    def exec(self, cmd):
+    def exec(self, cmd: str):
         if not self.proc:
             return
         print("[StarLord] Running: %s" % cmd)
-        write(self.ptyMaster, b"%s\n" % cmd.encode())
+        _ = write(cast(int, self.ptyMaster), b"%s\n" % cmd.encode())
 
     def ping(self):
         addr = (self.ip, self.port)
 
         try:
-            res = a2s_info(addr)
-            if res.ping:
+            res = a2s_info(addr) # type: ignore
+            if res.ping: # type: ignore
                 return True
         except:
             pass
         
         return False
 
-    def poll(self, waitTime):
+    def poll(self, waitTime: float):
         if not self.proc:
             return False
 
@@ -298,12 +305,12 @@ quit
                 self.setStateWithKillTimeout(STATE_LISTENING, 60)
         elif self.state == STATE_LISTENING:
             if self.ping():
-                self.setState(STATE_RUNNING)
+                _ = self.setState(STATE_RUNNING)
         elif self.state == STATE_RUNNING:
             if not self.ping():
                 self.setStateWithKillTimeout(STATE_FAILING, 60)
         elif self.state == STATE_FAILING:
             if self.ping():
-                self.setState(STATE_RUNNING)
+                _ = self.setState(STATE_RUNNING)
 
         return True

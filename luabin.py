@@ -5,12 +5,14 @@ from traceback import print_exception
 from requests import get as http_get
 from config import LuaBinConfig
 from updateable import UpdateableResource
-from typing import Optional
+from typing import Any, Mapping
 
-usedDLLs = set()
+usedDLLs: set[str] = set()
 
 class LuaBin(UpdateableResource):
-    def __init__(self, folder, name):
+    storage: Any
+
+    def __init__(self, folder: str, name: str) -> None:
         super().__init__(folder, name)
         self.load()
 
@@ -33,7 +35,7 @@ class LuaBin(UpdateableResource):
         with open(file, "w") as f:
             json_dump(self.storage, f)
         
-    def formatPath(self, name):
+    def formatPath(self, name: str):
         return join(self.folder, name)
 
     def makeBinaryName(self):
@@ -64,7 +66,7 @@ class GithubReleaseLuaBin(LuaBin):
     repo_org: str
     repo_name: str
 
-    def __init__(self, folder, name, config):
+    def __init__(self, folder: str, name: str, config: Mapping[str, Any]):
         super().__init__(folder, name)
         self.repo_org = config["org"]
         self.repo_name = config["name"]
@@ -76,7 +78,7 @@ class GithubReleaseLuaBin(LuaBin):
             self.fixed_tag = None
             self.release = "latest"
 
-    def queryReleaseInfo(self, use_release: Optional[str] = None):
+    def queryReleaseInfo(self, use_release: str | None = None):
         if use_release is None:
             use_release = self.fixed_tag
 
@@ -95,21 +97,21 @@ class GithubReleaseLuaBin(LuaBin):
 
         return release
 
-    def isReleaseInstalled(self, release):
+    def isReleaseInstalled(self, release: dict[str, Any]):
         return release["tag_name"] == self.storage.get("tag_name", "")
         
-    def storeRelease(self, release):
+    def storeRelease(self, release: dict[str, Any]):
         self.storage["tag_name"] = release["tag_name"]
         self.save()
 
-    def getBinaryURL(self, release):
+    def getBinaryURL(self, release: dict[str, Any]):
         binary_name = self.makeBinaryName()
         for asset in release["assets"]:
             if asset["name"] == binary_name:
                 return asset["browser_download_url"]
         return None
 
-    def checkUpdate(self, offline=False):
+    def checkUpdate(self, offline: bool = False):
         if offline:
             release = self.storage.get("release", None)
             if release is None:
@@ -140,15 +142,15 @@ class GithubReleaseLuaBin(LuaBin):
         resp = http_get(url=url, stream=True)
         resp.raise_for_status()
         with open(self.formatPath(self.makeBinaryName()), "wb") as f:
-            f.write(resp.content)
+            _ = f.write(resp.content)
 
         self.storeRelease(release)
 
-def makeLuaBin(folder, config: LuaBinConfig):
+def makeLuaBin(folder: str, config: LuaBinConfig):
     if config.type == "github_release":
         return GithubReleaseLuaBin(folder, config.name, config.config)
     else:
         raise ValueError(f"{config.type} is an invalid LuaBin type")
 
-def isDLLUsed(dll):
+def isDLLUsed(dll: str):
     return dll in usedDLLs

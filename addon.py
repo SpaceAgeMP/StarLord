@@ -5,8 +5,8 @@ from utils import unlink_safe
 from shutil import copyfile
 from config import AddonConfig
 
-usedGamemodes = set()
-usedAddons = set()
+usedGamemodes: set[str] = set()
+usedAddons: set[str] = set()
 
 usedGamemodes.add("base")
 usedGamemodes.add("sandbox")
@@ -33,7 +33,7 @@ class Addon(UpdateableResource):
             usedGamemodes.add(gamemode)
         usedAddons.add(self.nameLower)
 
-    def checkUpdate(self, offline=False):
+    def checkUpdate(self, offline: bool = False):
         return self.git.checkUpdate(offline)
 
     def update(self):
@@ -42,7 +42,7 @@ class Addon(UpdateableResource):
         for gamemode in self.gamemodes:
             gamemodeFolder = "%s/gamemodes/%s" % (self.folder, gamemode)
             link = "garrysmod/gamemodes/%s" % gamemode
-            unlink_safe(link)
+            _ = unlink_safe(link)
             symlink("../../%s" % gamemodeFolder, link, False)
 
         cfgFolder = "%s/cfg" % self.folder
@@ -52,11 +52,11 @@ class Addon(UpdateableResource):
                 mkdir(gameCfgFolder)
             for cfg in listdir(cfgFolder):
                 print("CONFIG INJECT", cfgFolder, gameCfgFolder, cfg)
-                copyfile("%s/%s" % (cfgFolder, cfg), "%s/%s" % (gameCfgFolder, cfg))
+                _ = copyfile("%s/%s" % (cfgFolder, cfg), "%s/%s" % (gameCfgFolder, cfg))
 
 
-def isGamemodeUsed(gamemode):
+def isGamemodeUsed(gamemode: str):
     return gamemode in usedGamemodes
 
-def isAddonUsed(addon):
+def isAddonUsed(addon: str):
     return addon in usedAddons

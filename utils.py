@@ -1,6 +1,7 @@
 from os import unlink, getenv
 from threading import Thread, Event
 from socket import socket, AF_INET, SOCK_DGRAM
+from typing import Callable
 
 def get_default_ip():
     envip = getenv("SRCDS_IP")
@@ -19,7 +20,7 @@ def get_default_port():
         return int(envport)
     return 27015
 
-def unlink_safe(path):
+def unlink_safe(path: str) -> bool:
     try:
         unlink(path)
         return True
@@ -27,7 +28,8 @@ def unlink_safe(path):
         return False
 
 class Timeout:
-    def __init__(self, timeout, func):
+    def __init__(self, timeout: float, func: Callable[[], None]):
+        super().__init__()
         self.timeout = timeout
         self.func = func
         self.running = True
@@ -45,6 +47,6 @@ class Timeout:
         self.e.set()
     
     def _func(self):
-        self.e.wait(timeout=self.timeout)
+        _ = self.e.wait(timeout=self.timeout)
         if self.running:
             self.func()

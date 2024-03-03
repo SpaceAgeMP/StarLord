@@ -10,7 +10,7 @@ class UpdateableResource(ABC):
         self.name = name
 
     @abstractmethod
-    def checkUpdate(self, offline=False):
+    def checkUpdate(self, offline: bool=False) -> bool:
         pass
         
     @abstractmethod

@@ -3,7 +3,7 @@ from datetime import timedelta
 
 regex = re_compile(r'^((?P<days>[\.\d]+?)d)?((?P<hours>[\.\d]+?)h)?((?P<minutes>[\.\d]+?)m)?((?P<seconds>[\.\d]+?)s)?$')
 
-def parse_timedelta(time_str):
+def parse_timedelta(time_str: str):
     """
     Parse a time string e.g. (2h13m) into a timedelta object.
 
