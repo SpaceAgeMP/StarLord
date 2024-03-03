@@ -2,6 +2,7 @@ from git import GitRepo
 from subprocess import check_call
 from server import ServerProcess
 from addon import Addon, isAddonUsed, isGamemodeUsed
+from updateable import UpdateableResource
 from luabin import makeLuaBin, isDLLUsed
 from config import load
 from os import listdir, path, getenv, waitpid, WNOHANG
@@ -11,17 +12,18 @@ from sys import stdin
 from signal import SIGCHLD, SIGINT, SIGTERM, SIGHUP, SIGUSR1, SIGUSR2, signal
 from timeutils import parse_timedelta
 from traceback import print_exception
+from typing import Any, cast, Callable
 
-def handleSIGCHLD(_a, _b):
-    waitpid(-1, WNOHANG)
-signal(SIGCHLD, handleSIGCHLD)
+def handleSIGCHLD(_a: Any, _b: Any):
+    _ = waitpid(-1, WNOHANG)
+_ = signal(SIGCHLD, handleSIGCHLD)
 
 FOLDER = path.abspath(path.dirname(__file__))
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git", "main")
 
-config = load(getenv("STARLORD_CONFIG"))
+config = load(cast(str, getenv("STARLORD_CONFIG")))
 
-server = ServerProcess(path.join(getenv("HOME"), "s"), config.server)
+server = ServerProcess(path.join(cast(str, getenv("HOME")), "s"), config.server)
 server.writeLocalConfig()
 
 updateCheckerEvent = None
@@ -31,21 +33,21 @@ def fireUpdateChecker():
         updateCheckerEvent.set()
         updateCheckerEvent = None
 
-def handleSigusr1(_a, _b):
+def handleSigusr1(_a: Any, _b: Any):
     fireUpdateChecker()
-signal(SIGUSR1, handleSigusr1)
+_ = signal(SIGUSR1, handleSigusr1)
 
-def handleSigusr2(_a, _b):
+def handleSigusr2(_a: Any, _b: Any):
     server.restartIfEmpty()
-signal(SIGUSR2, handleSigusr2)
+_ = signal(SIGUSR2, handleSigusr2)
 
-def handleStopSignal(_a, _b):
+def handleStopSignal(_a: Any, _b: Any):
     server.stop()
-signal(SIGTERM, handleStopSignal)
-signal(SIGINT, handleStopSignal)
-signal(SIGHUP, handleStopSignal)
+_ = signal(SIGTERM, handleStopSignal)
+_ = signal(SIGINT, handleStopSignal)
+_ = signal(SIGHUP, handleStopSignal)
 
-addons = []
+addons: list[UpdateableResource] = []
 for addonCfg in config.addons:
     addons.append(Addon(addonCfg))
 
@@ -89,11 +91,11 @@ def checkUpdates():
         print_exception(e)
     return hasUpdates
 
-def cleanupFolder(folder, checkfn):
+def cleanupFolder(folder: str, checkfn: Callable[[str], bool]):
     if not path.exists(folder):
         return
 
-    check_call(["rm", "-rf"] + [path.join(folder, file) for file in listdir(folder) if not checkfn(file)])
+    _ = check_call(["rm", "-rf"] + [path.join(folder, file) for file in listdir(folder) if not checkfn(file)])
 
 def cleanupFolders():
     server.switchTo()
@@ -118,7 +120,7 @@ def updateChecker():
             print_exception(e)
 
         updateCheckerEvent = Event()
-        updateCheckerEvent.wait(timeout=600)
+        _ = updateCheckerEvent.wait(timeout=600)
 
 def stdinChecker():
     for line in stdin:
