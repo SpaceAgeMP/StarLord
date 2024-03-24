@@ -61,7 +61,7 @@ class ServerProcess:
         if self.port == 0:
             self.port = get_default_port()
 
-        fh = open(path.join(self.folder, "garrysmod/sa_config/api.json"))
+        fh = open(path.join(self.folder, "garrysmod/data_static/sa_config/api.json"))
         data = fh.read()
         fh.close()
 
