@@ -70,7 +70,7 @@ class ServerProcess:
         self.apiAuth = "Server %s" % self.serverToken
 
     def getAPIData(self):
-        res = http_get("https://api.spaceage.doridian.net/v2/servers/self/config", headers={
+        res = http_get("https://api.spaceage.mp/v2/servers/self/config", headers={
             "Authorization": self.apiAuth,
         })
         return json_loads(res.text)
