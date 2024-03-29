@@ -28,7 +28,7 @@ case "${ENABLE_SELF_UPDATE##0}" in
         ;;
     "0"|"false"|"False"|"FALSE"|"no"|"No"|"NO")
         export ENABLE_SELF_UPDATE=false
-        rsync --exclude=.git --exclude=.github --exclude=misc --delete -av /opt/StarLord/ "${STARLORD_DIR}/"
+        rsync --exclude=__pycache__ --exclude=.git --exclude=.github --exclude=misc --delete -av /opt/StarLord/ "${STARLORD_DIR}/"
         exec_starlord
         ;;
     *)
