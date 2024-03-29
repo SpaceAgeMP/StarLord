@@ -10,7 +10,6 @@ server:
   restart_every: "24h"
 addons:
 - name: SpaceAge
-  private: yes
   trusted: yes
   gamemodes:
     - spaceage

@@ -1,10 +1,10 @@
-from os import chdir, path, O_NONBLOCK, read, write, close, getenv
+from os import chdir, path, O_NONBLOCK, read, write, close, getenv, makedirs
 from subprocess import Popen, check_call, check_output
 from tempfile import NamedTemporaryFile
 from traceback import print_exc
 from workshop import getWorkshopItems
 from time import sleep
-from json import loads as json_loads
+from json import loads as json_loads, dumps as json_dumps
 from requests import get as http_get
 from utils import Timeout, get_default_ip, get_default_port
 from a2s import info as a2s_info # type: ignore
@@ -14,17 +14,19 @@ from sys import stdout
 from pty import openpty
 from fcntl import fcntl, F_GETFL, F_SETFL
 from config import ServerConfig
-from typing import cast, Callable
+from typing import cast, Callable, Any
 
 STREAM_STDOUT = 0
 STREAM_STDERR = 1
 
 STATE_STOPPED = 0
-STATE_STARTING = 1
-STATE_RUNNING = 2
-STATE_STOPPING = 3
-STATE_LISTENING = 4
-STATE_FAILING = 5
+STATE_STARTING_PRE_WORKSHOP = 1
+STATE_STARTING_IN_WORKSHOP = 2
+STATE_STARTING_POST_WORKSHOP = 3
+STATE_RUNNING = 4
+STATE_STOPPING = 5
+STATE_LISTENING = 6
+STATE_FAILING = 7
 
 LOADADDONS_FILE_GMOD = "autorun/server/loadaddons.lua"
 LOADADDONS_FILE_SERVER = "garrysmod/lua/%s" % LOADADDONS_FILE_GMOD
@@ -39,6 +41,7 @@ class ServerProcess:
     def __init__(self, folder: str, config: ServerConfig):
         super().__init__()
         self.folder = path.abspath(folder)
+        makedirs(self.folder, exist_ok=True)
 
         self.pidfile = path.join(self.folder, "pid")
         self.proc = None
@@ -61,18 +64,26 @@ class ServerProcess:
         if self.port == 0:
             self.port = get_default_port()
 
-        fh = open(path.join(self.folder, "garrysmod/data_static/sa_config/api.json"))
-        data = fh.read()
-        fh.close()
-
-        dataDict = json_loads(data)
-        self.serverToken = dataDict["serverToken"]
+        apiJsonFile = path.join(self.folder, "garrysmod/data_static/sa_config/api.json")
+        self.serverToken = getenv("SPACEAGE_SERVER_TOKEN")
         self.apiAuth = "Server %s" % self.serverToken
+
+        apiJsonData = {}
+        if path.exists(apiJsonFile):
+            with open(apiJsonFile, "r") as fh:
+                apiJsonData = cast(dict[str, Any], json_loads(fh.read()))
+
+        if apiJsonData.get("serverToken", "") != self.serverToken:
+            apiJsonData["serverToken"] = self.serverToken
+            makedirs(path.dirname(apiJsonFile), exist_ok=True)
+            with open(apiJsonFile, "w") as fh:
+                _ = fh.write(json_dumps(apiJsonData))
 
     def getAPIData(self):
         res = http_get("https://api.spaceage.mp/v2/servers/self/config", headers={
             "Authorization": self.apiAuth,
         })
+        res.raise_for_status()
         return json_loads(res.text)
 
     def writeLocalConfig(self):
@@ -86,6 +97,7 @@ rcon_password "%s"
 hostname "SpaceAge [%s]"
 """ % (data["steam_account_token"], data["rcon_password"], data["name"])
 
+        makedirs(path.join(self.folder, "garrysmod/cfg"), exist_ok=True)
         fh = open(path.join(self.folder, "garrysmod/cfg/localgame.cfg"), "w")
         _ = fh.write(localCfg)
         fh.close()
@@ -95,6 +107,7 @@ require("sentry")
 sentry.Setup("%s", {server_name = "%s"})
 """ % (data["sentry_dsn"], data["name"])
 
+        makedirs(path.join(self.folder, "garrysmod/lua/autorun/server"), exist_ok=True)
         fh = open(path.join(self.folder, "garrysmod/lua/autorun/server/localcfg.lua"), "w")
         _ = fh.write(localCfg)
         fh.close()
@@ -160,7 +173,7 @@ quit
 
         self.kill()
         self.running = True
-        self.setStateWithKillTimeout(STATE_STARTING, 60)
+        self.setStateWithKillTimeout(STATE_STARTING_PRE_WORKSHOP, 60)
 
         self.ptyMaster, self.ptySlave = openpty()
         fl = fcntl(self.ptyMaster, F_GETFL)
@@ -185,9 +198,25 @@ quit
         _ = stdout.write(data)
         stdout.flush()
 
+        if self.state == STATE_STARTING_PRE_WORKSHOP:
+            if "WS: Processing " in data:
+                self.setStateWithKillTimeout(STATE_STARTING_IN_WORKSHOP, 60)
+        elif self.state == STATE_STARTING_IN_WORKSHOP:
+            if "Addon needs downloading..." in data:
+                self.reconfigureStateKillTimeout(600)
+                print("[StarLord] Kill timeout set to 600 seconds due to workshop download start", flush=True)
+            elif "Mounted!" in data:
+                self.reconfigureStateKillTimeout(60)
+                print("[StarLord] Kill timeout set to 60 seconds due to workshop download end", flush=True)
+            elif "WS: Finished!" in data:
+                self.setStateWithKillTimeout(STATE_STARTING_POST_WORKSHOP, 60)
+
     def setStateWithKillTimeout(self, state: int, timeout: float):
         if self.setState(state):
-            self.setStateTimeout(timeout, self.kill)
+            self.reconfigureStateKillTimeout(timeout)
+
+    def reconfigureStateKillTimeout(self, timeout: float):
+        self.setStateTimeout(timeout, self.kill)
 
     def setState(self, state: int):
         if self.state == state:
@@ -271,7 +300,7 @@ quit
         except:
             return True
 
-        if self.state == STATE_STARTING:
+        if self.state == STATE_STARTING_PRE_WORKSHOP or self.state == STATE_STARTING_IN_WORKSHOP or self.state == STATE_STARTING_POST_WORKSHOP:
             lsof = ""
             try:
                 lsof = check_output(["lsof", "-Pani", "-p", "%d" % self.proc.pid, "-FPn"]).decode("utf8").strip().split("\n")

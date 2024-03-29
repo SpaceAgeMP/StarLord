@@ -1,6 +1,7 @@
 from platform import architecture, system
 from json import loads as json_loads, load as json_load, dump as json_dump
 from os.path import join
+from os import makedirs
 from traceback import print_exception
 from requests import get as http_get
 from config import LuaBinConfig
@@ -31,6 +32,7 @@ class LuaBin(UpdateableResource):
             self.storage = {}
 
     def save(self):
+        makedirs(self.folder, exist_ok=True)
         file = self.formatPath(self.makeMetaName())
         with open(file, "w") as f:
             json_dump(self.storage, f)
