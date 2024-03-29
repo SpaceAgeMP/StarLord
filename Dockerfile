@@ -6,6 +6,8 @@ RUN apt update && \
         rm -rf /var/cache/apt
 RUN pip3 install python_a2s
 
+VOLUME /home/server
+
 RUN groupadd server -g 1000 && \
         useradd server -u 1000 -g 1000 -s /bin/false && \
         mkdir -p /home/server && \
