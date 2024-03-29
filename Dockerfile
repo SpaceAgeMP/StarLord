@@ -21,4 +21,4 @@ ENV SPACEAGE_SERVER_TOKEN=dummy
 
 COPY . /opt/StarLord
 
-ENTRYPOINT ["/opt/StarLord/dockerboot.sh"]
+ENTRYPOINT ["/opt/StarLord/misc/dockerboot.sh"]
