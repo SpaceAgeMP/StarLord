@@ -18,6 +18,8 @@ def handleSIGCHLD(_a: Any, _b: Any):
     _ = waitpid(-1, WNOHANG)
 _ = signal(SIGCHLD, handleSIGCHLD)
 
+enableSelfUpdate = getenv("ENABLE_SELF_UPDATE", "false") == "true"
+
 FOLDER = path.abspath(path.dirname(__file__))
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git", "main")
 
@@ -66,14 +68,17 @@ def runUpdates():
 
 def checkUpdates():
     hasUpdates = False
-    print("Checking self")
-    try:
-        hasUpdates = selfRepo.checkUpdate()
-        if hasUpdates:
-            print("Update found for self")
-        selfRepo.update()
-    except Exception as e:
-        print_exception(e)
+    if enableSelfUpdate:
+        print("Checking self")
+        try:
+            hasUpdates = selfRepo.checkUpdate()
+            if hasUpdates:
+                print("Update found for self")
+            selfRepo.update()
+        except Exception as e:
+            print_exception(e)
+    else:
+        print("Self update disabled")
 
     for addon in addons:
         print("Checking addon", addon)

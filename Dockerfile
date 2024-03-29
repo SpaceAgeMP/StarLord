@@ -2,7 +2,7 @@ FROM steamcmd/steamcmd:ubuntu
 
 RUN apt update && \
         apt -y dist-upgrade && \
-        apt --no-install-recommends -y install python3 python3-requests python3-yaml python3-pip git openssh-client lsof libssl3 libboost-system1.74.0 && \
+        apt --no-install-recommends -y install python3 python3-requests python3-yaml python3-pip git openssh-client lsof libssl3 libboost-system1.74.0 rsync && \
         rm -rf /var/cache/apt
 RUN pip3 install python_a2s
 
@@ -17,7 +17,8 @@ USER server
 ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/game
 ENV HOME=/home/server
 ENV STARLORD_CONFIG=spaceage_gooniverse
-ENV SPACEAGE_SERVER_TOKEN=dummy
+ENV SPACEAGE_SERVER_TOKEN=
+ENV ENABLE_SELF_UPDATE=false
 
 COPY . /opt/StarLord
 
