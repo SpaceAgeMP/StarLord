@@ -1,7 +1,7 @@
 from platform import architecture, system
 from json import loads as json_loads, load as json_load, dump as json_dump
 from os.path import join
-from os import makedirs
+from os import makedirs, getenv
 from traceback import print_exception
 from requests import get as http_get
 from config import LuaBinConfig
@@ -15,6 +15,7 @@ class LuaBin(UpdateableResource):
 
     def __init__(self, folder: str, name: str) -> None:
         super().__init__(folder, name)
+        self.disable_updates = getenv(f"DISABLE_UPDATE_LUABIN_{self.name.upper()}", "") == "true"
         self.load()
 
     def load(self):
@@ -114,6 +115,9 @@ class GithubReleaseLuaBin(LuaBin):
         return None
 
     def checkUpdate(self, offline: bool = False):
+        if self.disable_updates:
+            return False
+
         if offline:
             release = self.storage.get("release", None)
             if release is None:
@@ -129,6 +133,9 @@ class GithubReleaseLuaBin(LuaBin):
         return True
 
     def update(self):
+        if self.disable_updates:
+            return
+
         release = self.storage.get("release", None)
         if release is None:
             release = self.queryReleaseInfo()

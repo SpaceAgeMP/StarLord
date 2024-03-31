@@ -1,6 +1,6 @@
 from git import GitRepo
 from updateable import UpdateableResource
-from os import mkdir, path, symlink, listdir
+from os import mkdir, path, symlink, listdir, getenv
 from utils import unlink_safe
 from shutil import copyfile
 from config import AddonConfig
@@ -19,6 +19,7 @@ class Addon(UpdateableResource):
         self.nameLower = self.name.lower()
         self.trusted = config.trusted
         self.gamemodes = config.gamemodes
+        self.disable_updates = getenv(f"DISABLE_UPDATE_ADDON_{self.name.upper()}", "") == "true"
 
         if config.repo:
             self.repo = config.repo
@@ -34,10 +35,13 @@ class Addon(UpdateableResource):
         usedAddons.add(self.nameLower)
 
     def checkUpdate(self, offline: bool = False):
+        if self.disable_updates:
+            return False
         return self.git.checkUpdate(offline)
 
     def update(self):
-        self.git.update()
+        if not self.disable_updates:
+            self.git.update()
 
         for gamemode in self.gamemodes:
             gamemodeFolder = "%s/gamemodes/%s" % (self.folder, gamemode)
