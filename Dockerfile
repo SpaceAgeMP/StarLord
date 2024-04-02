@@ -19,6 +19,7 @@ ENV HOME=/home/server
 ENV STARLORD_CONFIG=spaceage_gooniverse
 ENV SPACEAGE_SERVER_TOKEN=
 ENV ENABLE_SELF_UPDATE=false
+ENV SRCDS_CMD_FIFO=/tmp/srcds.fifo
 
 COPY . /opt/StarLord
 

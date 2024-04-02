@@ -5,7 +5,7 @@ from addon import Addon, isAddonUsed, isGamemodeUsed
 from updateable import UpdateableResource
 from luabin import makeLuaBin, isDLLUsed
 from config import load
-from os import listdir, path, getenv, waitpid, WNOHANG
+from os import listdir, path, getenv, waitpid, WNOHANG, unlink, mkfifo
 from time import sleep
 from threading import Thread, Event
 from sys import stdin
@@ -20,6 +20,7 @@ _ = signal(SIGCHLD, handleSIGCHLD)
 
 enableSelfUpdate = getenv("ENABLE_SELF_UPDATE", "false") == "true"
 
+SRCDS_CMD_FIFO = getenv("SRCDS_CMD_FIFO", "")
 FOLDER = path.abspath(path.dirname(__file__))
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git", "main")
 
@@ -131,6 +132,12 @@ def stdinChecker():
     for line in stdin:
         server.exec(line.strip())
 
+def fifoReader():
+    while True:
+        with open(SRCDS_CMD_FIFO) as fifo:
+            for line in fifo:
+                server.exec(line.strip())
+
 def restartTimer():
     if not config.server.restart_every:
         return
@@ -147,6 +154,15 @@ restartTimerThread.start()
 if stdin.isatty():
     stdinThread = Thread(target=stdinChecker, name="STDIN reader", daemon=True)
     stdinThread.start()
+
+if SRCDS_CMD_FIFO:
+    try:
+        unlink(SRCDS_CMD_FIFO)
+    except:
+        pass
+    mkfifo(SRCDS_CMD_FIFO)
+    fifoThread = Thread(target=fifoReader, name="FIFO reader", daemon=True)
+    fifoThread.start()
 
 while server.poll(waitTime=1):
     pass
