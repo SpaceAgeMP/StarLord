@@ -37,6 +37,11 @@ luabins:
   config:
     org: SpaceAgeMP
     name: gm_luaerror
+- name: enginespew
+  type: github_release
+  config:
+    org: SpaceAgeMP
+    name: gm_enginespew
 - name: random
   type: github_release
   config:
