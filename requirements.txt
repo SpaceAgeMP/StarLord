@@ -1,3 +1,3 @@
-pyright==1.1.360
+pyright==1.1.361
 python-a2s==1.3.0
 requests==2.31.0
