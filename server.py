@@ -304,36 +304,7 @@ quit
             return True
 
         if self.state == STATE_STARTING_PRE_WORKSHOP or self.state == STATE_STARTING_IN_WORKSHOP or self.state == STATE_STARTING_POST_WORKSHOP:
-            lsof = ""
-            try:
-                lsof = check_output(["lsof", "-Pani", "-p", "%d" % self.proc.pid, "-FPn"]).decode("utf8").strip().split("\n")
-            except:
-                print("[StarLord] lsof failed...")
-                pass
-
-            serverUDP = False
-
-            proto = None
-            sock = None
-            for line in lsof:
-                if len(line) < 2:
-                    continue
-
-                typ = line[0]
-                data = line[1:].strip()
-                if typ == "P":
-                    proto = data
-                elif typ == "n":
-                    sock = data
-
-                if proto and sock:
-                    if proto == "UDP" and sock == "%s:%d" % (self.ip, self.port):
-                        serverUDP = True
-                        break
-                    proto = None
-                    sock = None
-            
-            if serverUDP:
+            if self.ping():
                 self.setStateWithKillTimeout(STATE_LISTENING, 60)
         elif self.state == STATE_LISTENING:
             if self.ping():
