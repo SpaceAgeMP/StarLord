@@ -193,6 +193,7 @@ quit
                     self.onOutput(data)
                 except:
                     print_exc()
+                    print("[StarLord] Process state:", self.proc)
 
     def onOutput(self, data: str):
         _ = stdout.write(data)
@@ -240,6 +241,7 @@ quit
         self.exec("restart_if_empty 1")
 
     def stop(self):
+        print("[StarLord] Stop server")
         if self.state == STATE_RUNNING:
             self.setStateWithKillTimeout(STATE_STOPPING, 15)
             self.exec("exit")
@@ -247,6 +249,7 @@ quit
             self.kill()
 
     def kill(self):
+        print("[StarLord] Kill server")
         self.running = False
         _ = self.setState(STATE_STOPPED)
 
