@@ -8,8 +8,8 @@ RUN pip3 install --break-system-packages python_a2s
 
 VOLUME /home/server
 
-RUN (userdel 1000 || true) && \
-    (groupdel 1000 || true) && \
+RUN (groupdel "$(id -n -g 1000)" || true) && \
+    (userdel "$(id -n -u 1000)" || true) && \
         groupadd server -g 1000 && \
         useradd server -u 1000 -g 1000 -s /bin/false && \
         mkdir -p /home/server && \
