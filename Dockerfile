@@ -4,7 +4,7 @@ RUN apt update && \
         apt -y dist-upgrade && \
         apt --no-install-recommends -y install python3 python3-requests python3-yaml python3-pip git openssh-client lsof libssl3 libboost-system1.74.0 rsync && \
         rm -rf /var/cache/apt
-RUN pip3 install python_a2s
+RUN pip3 install --break-system-packages python_a2s
 
 VOLUME /home/server
 
