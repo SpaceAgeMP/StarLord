@@ -192,12 +192,12 @@ quit
                     data = read(fd, 8192).decode('utf-8')
                     self.onOutput(data)
                 except:
-                    print_exc()
                     print("[StarLord] Process state:", self.proc)
+                    print_exc()
 
     def onOutput(self, data: str):
         _ = stdout.write(data)
-        stdout.flush()
+        _ = stdout.flush()
 
         if self.state == STATE_STARTING_PRE_WORKSHOP:
             if "WS: Processing " in data:
