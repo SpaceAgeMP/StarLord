@@ -8,7 +8,9 @@ RUN pip3 install --break-system-packages python_a2s
 
 VOLUME /home/server
 
-RUN groupadd server -g 1000 && \
+RUN (userdel 1000 || true) && \
+    (groupdel 1000 || true) && \
+        groupadd server -g 1000 && \
         useradd server -u 1000 -g 1000 -s /bin/false && \
         mkdir -p /home/server && \
         chown -R server:server /home/server
