@@ -61,7 +61,7 @@ def runUpdates():
     server.updateBin()
     server.switchTo()
     for addon in addons:
-        print("Updating", addon)
+        print("Updating", addon, flush=True)
         try:
             addon.update()
         except Exception as e:
@@ -70,27 +70,27 @@ def runUpdates():
 def checkUpdates():
     hasUpdates = False
     if enableSelfUpdate:
-        print("Checking self")
+        print("Checking self", flush=True)
         try:
             hasUpdates = selfRepo.checkUpdate()
             if hasUpdates:
-                print("Update found for self")
+                print("Update found for self", flush=True)
             selfRepo.update()
         except Exception as e:
             print_exception(e)
     else:
-        print("Self update disabled")
+        print("Self update disabled", flush=True)
 
     for addon in addons:
-        print("Checking addon", addon)
+        print("Checking addon", addon, flush=True)
         try:
             if addon.checkUpdate():
-                print("Update found for addon", addon)
+                print("Update found for addon", addon, flush=True)
                 hasUpdates = True
         except Exception as e:
             print_exception(e)
 
-    print("Checking workshop")
+    print("Checking workshop", flush=True)
     try:
         server.updateWorkshopLua()
     except Exception as e:
@@ -116,13 +116,13 @@ server.run()
 def updateChecker():
     global updateCheckerEvent
     while server.running:
-        print("Checking for updates...")
+        print("Checking for updates...", flush=True)
         try:
             hasUpdates = checkUpdates()
             if hasUpdates:
                 server.restartIfEmpty()
         except Exception as e:
-            print("Error checking for updates")
+            print("Error checking for updates", flush=True)
             print_exception(e)
 
         updateCheckerEvent = Event()

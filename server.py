@@ -1,5 +1,5 @@
 from os import chdir, path, O_NONBLOCK, read, write, close, getenv, makedirs
-from subprocess import Popen, check_call, check_output
+from subprocess import Popen, check_call
 from tempfile import NamedTemporaryFile
 from traceback import print_exc
 from workshop import getWorkshopItems
@@ -192,7 +192,7 @@ quit
                     data = read(fd, 8192).decode('utf-8')
                     self.onOutput(data)
                 except:
-                    print("[StarLord] Process state:", self.proc)
+                    print("[StarLord] Process state:", self.proc, flush=True)
                     print_exc()
 
     def onOutput(self, data: str):
@@ -224,7 +224,7 @@ quit
             return False
         self.clearStateTimeout()
         self.state = state
-        print("[StarLord] Server state changed to %d" % self.state)
+        print("[StarLord] Server state changed to %d" % self.state, flush=True)
         return True
 
     def clearStateTimeout(self):
@@ -241,7 +241,7 @@ quit
         self.exec("restart_if_empty 1")
 
     def stop(self):
-        print("[StarLord] Stop server")
+        print("[StarLord] Stop server", flush=True)
         if self.state == STATE_RUNNING:
             self.setStateWithKillTimeout(STATE_STOPPING, 15)
             self.exec("exit")
@@ -249,7 +249,7 @@ quit
             self.kill()
 
     def kill(self):
-        print("[StarLord] Kill server")
+        print("[StarLord] Kill server", flush=True)
         self.running = False
         _ = self.setState(STATE_STOPPED)
 
@@ -275,7 +275,7 @@ quit
     def exec(self, cmd: str):
         if not self.proc:
             return
-        print("[StarLord] Running: %s" % cmd)
+        print("[StarLord] Running: %s" % cmd, flush=True)
         _ = write(cast(int, self.ptyMaster), b"%s\n" % cmd.encode())
 
     def ping(self):

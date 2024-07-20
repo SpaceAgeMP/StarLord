@@ -128,7 +128,7 @@ class GithubReleaseLuaBin(LuaBin):
         if self.isReleaseInstalled(release):
             return False
         if self.getBinaryURL(release) is None:
-            print("Found update, but no binary, pointless to update")
+            print("Found update, but no binary, pointless to update", flush=True)
             return False
         return True
 
@@ -145,7 +145,7 @@ class GithubReleaseLuaBin(LuaBin):
 
         url = self.getBinaryURL(release)
         if url is None:
-            print("LuaBin manifest missing binaries, ignoring")
+            print("LuaBin manifest missing binaries, ignoring", flush=True)
             return
 
         resp = http_get(url=url, stream=True)

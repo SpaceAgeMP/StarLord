@@ -55,7 +55,7 @@ class Addon(UpdateableResource):
             if not path.exists(gameCfgFolder):
                 mkdir(gameCfgFolder)
             for cfg in listdir(cfgFolder):
-                print("CONFIG INJECT", cfgFolder, gameCfgFolder, cfg)
+                print("CONFIG INJECT", cfgFolder, gameCfgFolder, cfg, flush=True)
                 _ = copyfile("%s/%s" % (cfgFolder, cfg), "%s/%s" % (gameCfgFolder, cfg))
 
 
