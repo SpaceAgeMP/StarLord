@@ -276,7 +276,9 @@ quit
         if not self.proc:
             return
         print("[StarLord] Running: %s" % cmd, flush=True)
-        _ = write(cast(int, self.ptyMaster), b"%s\n" % cmd.encode())
+        data = b"%s\n" % cmd.encode()
+        n = write(cast(int, self.ptyMaster), data)
+        print(f"[StarLord] Wrote {n} out of {len(data)} bytes to pty", flush=True)
 
     def ping(self):
         addr = (self.ip, self.port)
