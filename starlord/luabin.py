@@ -4,8 +4,8 @@ from os.path import join
 from os import makedirs, getenv
 from traceback import print_exception
 from requests import get as http_get
-from config import LuaBinConfig
-from updateable import UpdateableResource
+from starlord.config import LuaBinConfig
+from starlord.updateable import UpdateableResource
 from typing import Any, Mapping
 
 usedDLLs: set[str] = set()

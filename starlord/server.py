@@ -2,18 +2,18 @@ from os import chdir, path, O_NONBLOCK, read, write, close, getenv, makedirs
 from subprocess import Popen, check_call
 from tempfile import NamedTemporaryFile
 from traceback import print_exc
-from workshop import getWorkshopItems
+from starlord.workshop import getWorkshopItems
 from time import sleep
 from json import loads as json_loads, dumps as json_dumps
 from requests import get as http_get
-from utils import Timeout, get_default_ip, get_default_port
+from starlord.utils import Timeout, get_default_ip, get_default_port
 from a2s import info as a2s_info # type: ignore
 from select import select
 from threading import Thread
 from sys import stdout
 from pty import openpty
 from fcntl import fcntl, F_GETFL, F_SETFL
-from config import ServerConfig
+from starlord.config import ServerConfig
 from typing import cast, Callable, Any
 
 STREAM_STDOUT = 0

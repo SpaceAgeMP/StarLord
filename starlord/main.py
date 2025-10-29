@@ -1,24 +1,22 @@
-from git import GitRepo
+from starlord.git import GitRepo
 from subprocess import check_call
-from server import ServerProcess
-from addon import Addon, isAddonUsed, isGamemodeUsed
-from updateable import UpdateableResource
-from luabin import makeLuaBin, isDLLUsed
-from config import load
+from starlord.server import ServerProcess
+from starlord.addon import Addon, isAddonUsed, isGamemodeUsed
+from starlord.updateable import UpdateableResource
+from starlord.luabin import makeLuaBin, isDLLUsed
+from starlord.config import load
 from os import listdir, path, getenv, waitpid, WNOHANG, unlink, mkfifo
 from time import sleep
 from threading import Thread, Event
 from sys import stdin
 from signal import SIGCHLD, SIGINT, SIGTERM, SIGHUP, SIGUSR1, SIGUSR2, signal
-from timeutils import parse_timedelta
+from starlord.timeutils import parse_timedelta
 from traceback import print_exception
 from typing import Any, cast, Callable
 
 def handleSIGCHLD(_a: Any, _b: Any):
     _ = waitpid(-1, WNOHANG)
 _ = signal(SIGCHLD, handleSIGCHLD)
-
-enableSelfUpdate = getenv("ENABLE_SELF_UPDATE", "false") == "true"
 
 SRCDS_CMD_FIFO = getenv("SRCDS_CMD_FIFO", "")
 FOLDER = path.abspath(path.dirname(__file__))
@@ -69,17 +67,6 @@ def runUpdates():
 
 def checkUpdates():
     hasUpdates = False
-    if enableSelfUpdate:
-        print("Checking self", flush=True)
-        try:
-            hasUpdates = selfRepo.checkUpdate()
-            if hasUpdates:
-                print("Update found for self", flush=True)
-            selfRepo.update()
-        except Exception as e:
-            print_exception(e)
-    else:
-        print("Self update disabled", flush=True)
 
     for addon in addons:
         print("Checking addon", addon, flush=True)
@@ -145,27 +132,28 @@ def restartTimer():
     sleep(timedelta.total_seconds())
     server.restartIfEmpty()
 
-updateCheckerThread = Thread(target=updateChecker, name="Update checker")
-updateCheckerThread.start()
+def main():
+    updateCheckerThread = Thread(target=updateChecker, name="Update checker")
+    updateCheckerThread.start()
 
-restartTimerThread = Thread(target=restartTimer, name="Restart timer", daemon=True)
-restartTimerThread.start()
+    restartTimerThread = Thread(target=restartTimer, name="Restart timer", daemon=True)
+    restartTimerThread.start()
 
-if stdin.isatty():
-    stdinThread = Thread(target=stdinChecker, name="STDIN reader", daemon=True)
-    stdinThread.start()
+    if stdin.isatty():
+        stdinThread = Thread(target=stdinChecker, name="STDIN reader", daemon=True)
+        stdinThread.start()
 
-if SRCDS_CMD_FIFO:
-    try:
-        unlink(SRCDS_CMD_FIFO)
-    except:
+    if SRCDS_CMD_FIFO:
+        try:
+            unlink(SRCDS_CMD_FIFO)
+        except:
+            pass
+        mkfifo(SRCDS_CMD_FIFO)
+        fifoThread = Thread(target=fifoReader, name="FIFO reader", daemon=True)
+        fifoThread.start()
+
+    while server.poll(waitTime=1):
         pass
-    mkfifo(SRCDS_CMD_FIFO)
-    fifoThread = Thread(target=fifoReader, name="FIFO reader", daemon=True)
-    fifoThread.start()
 
-while server.poll(waitTime=1):
-    pass
-
-fireUpdateChecker()
-updateCheckerThread.join()
+    fireUpdateChecker()
+    updateCheckerThread.join()

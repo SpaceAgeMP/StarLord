@@ -1,9 +1,9 @@
-from git import GitRepo
-from updateable import UpdateableResource
+from starlord.git import GitRepo
+from starlord.updateable import UpdateableResource
 from os import mkdir, path, symlink, listdir, getenv
-from utils import unlink_safe
+from starlord.utils import unlink_safe
 from shutil import copyfile
-from config import AddonConfig
+from starlord.config import AddonConfig
 
 usedGamemodes: set[str] = set()
 usedAddons: set[str] = set()

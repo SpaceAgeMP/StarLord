@@ -1,6 +1,6 @@
 from subprocess import check_call, check_output
 from os import path
-from updateable import UpdateableResource
+from starlord.updateable import UpdateableResource
 
 class GitRepo(UpdateableResource):
     repo: str

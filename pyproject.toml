@@ -1,0 +1,21 @@
+[project]
+name = "starlord"
+version = "0.1.0"
+description = "SpaceAge server manager"
+requires-python = ">=3.12"
+dependencies = [
+    "pyright==1.1.407",
+    "python-a2s==1.4.1",
+    "pyyaml>=6.0.3",
+    "requests==2.32.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["starlord"]
+
+[project.scripts]
+starlord = "starlord.main:main"
