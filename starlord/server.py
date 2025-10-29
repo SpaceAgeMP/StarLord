@@ -127,14 +127,12 @@ app_update 4020 -beta x86-64
 quit
 """ % path.abspath(".")
 
-        tmpFile = NamedTemporaryFile(mode="w+", suffix=".txt")
+        steamcmdFile = path.join(self.folder, "steamcmd.txt")
 
-        _ = tmpFile.write(steamcmdScript)
-        tmpFile.flush()
-        try:
-            _ = check_call(["steamcmd", "+runscript", tmpFile.name])
-        finally:
-            tmpFile.close()
+        with open(steamcmdFile, "w") as fh:
+            _ = fh.write(steamcmdScript)
+
+        _ = check_call(["steamcmd", "+runscript", steamcmdFile])
 
     def updateWorkshopLua(self):
         self.switchTo()
