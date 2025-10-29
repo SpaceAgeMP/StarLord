@@ -152,7 +152,7 @@ quit
         if not path.exists(LOADADDONS_FILE_SERVER):
             self.updateWorkshopLua()
 
-        args: list[str] = [path.join(self.folder, "bin/linux64/srcds"),
+        args: list[str] = ["steam-run", "./bin/linux64/srcds",
                     "-usercon", "-autoupdate", "-disableluarefresh", "-console", "-allowlocalhttp",
                     "+ip", self.ip, "-port", "%i" % self.port,
                     "-tickrate", "%i" % self.config.tickrate, "-game", "garrysmod", "+maxplayers", "%i" % self.config.maxplayers,
@@ -176,7 +176,7 @@ quit
         fl = fcntl(self.ptyMaster, F_GETFL)
         _ = fcntl(self.ptyMaster, F_SETFL, fl | O_NONBLOCK)
 
-        self.proc = Popen(args, cwd=self.folder, env=env, bufsize=0, stdin=self.ptySlave, stdout=self.ptySlave, stderr=self.ptySlave, close_fds=True, encoding='utf-8')
+        self.proc = Popen(args, env=env, bufsize=0, stdin=self.ptySlave, stdout=self.ptySlave, stderr=self.ptySlave, close_fds=True, encoding='utf-8')
         self.stdoutThread = Thread(target=self.stdoutThreadFunc, daemon=True, name="Server stdout")
         self.stdoutThread.start()
     
