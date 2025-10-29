@@ -14,10 +14,6 @@ from starlord.timeutils import parse_timedelta
 from traceback import print_exception
 from typing import Any, cast, Callable
 
-def handleSIGCHLD(_a: Any, _b: Any):
-    _ = waitpid(-1, WNOHANG)
-_ = signal(SIGCHLD, handleSIGCHLD)
-
 SRCDS_CMD_FIFO = getenv("SRCDS_CMD_FIFO", "")
 FOLDER = path.abspath(path.dirname(__file__))
 selfRepo = GitRepo(FOLDER, "https://github.com/SpaceAgeMP/StarLord.git", "main")
@@ -33,20 +29,6 @@ def fireUpdateChecker():
     if updateCheckerEvent:
         updateCheckerEvent.set()
         updateCheckerEvent = None
-
-def handleSigusr1(_a: Any, _b: Any):
-    fireUpdateChecker()
-_ = signal(SIGUSR1, handleSigusr1)
-
-def handleSigusr2(_a: Any, _b: Any):
-    server.restartIfEmpty()
-_ = signal(SIGUSR2, handleSigusr2)
-
-def handleStopSignal(_a: Any, _b: Any):
-    server.stop()
-_ = signal(SIGTERM, handleStopSignal)
-_ = signal(SIGINT, handleStopSignal)
-_ = signal(SIGHUP, handleStopSignal)
 
 addons: list[UpdateableResource] = []
 for addonCfg in config.addons:
@@ -96,10 +78,6 @@ def cleanupFolders():
     cleanupFolder("garrysmod/addons", isAddonUsed)
     cleanupFolder("garrysmod/lua/bin", isDLLUsed)
 
-runUpdates()
-cleanupFolders()
-server.run()
-
 def updateChecker():
     global updateCheckerEvent
     while server.running:
@@ -133,6 +111,28 @@ def restartTimer():
     server.restartIfEmpty()
 
 def main():
+    def handleSIGCHLD(_a: Any, _b: Any):
+        _ = waitpid(-1, WNOHANG)
+    _ = signal(SIGCHLD, handleSIGCHLD)
+
+    def handleSigusr1(_a: Any, _b: Any):
+        fireUpdateChecker()
+    _ = signal(SIGUSR1, handleSigusr1)
+
+    def handleSigusr2(_a: Any, _b: Any):
+        server.restartIfEmpty()
+    _ = signal(SIGUSR2, handleSigusr2)
+
+    def handleStopSignal(_a: Any, _b: Any):
+        server.stop()
+    _ = signal(SIGTERM, handleStopSignal)
+    _ = signal(SIGINT, handleStopSignal)
+    _ = signal(SIGHUP, handleStopSignal)
+
+    runUpdates()
+    cleanupFolders()
+    server.run()
+
     updateCheckerThread = Thread(target=updateChecker, name="Update checker")
     updateCheckerThread.start()
 
