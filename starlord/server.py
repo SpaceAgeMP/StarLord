@@ -32,6 +32,8 @@ LOADADDONS_FILE_SERVER = "garrysmod/lua/%s" % LOADADDONS_FILE_GMOD
 
 LD_LIBRARY_PATHS = ["./linux64", "./bin/linux64"]
 
+STEAM_RUN = getenv("STEAM_RUN", "steam-run")
+
 class ServerProcess:
     folder: str
     pidfile: str
@@ -152,7 +154,7 @@ quit
         if not path.exists(LOADADDONS_FILE_SERVER):
             self.updateWorkshopLua()
 
-        args: list[str] = ["steam-run", "./bin/linux64/srcds",
+        args: list[str] = [STEAM_RUN, "./bin/linux64/srcds",
                     "-usercon", "-autoupdate", "-disableluarefresh", "-console", "-allowlocalhttp",
                     "+ip", self.ip, "-port", "%i" % self.port,
                     "-tickrate", "%i" % self.config.tickrate, "-game", "garrysmod", "+maxplayers", "%i" % self.config.maxplayers,
