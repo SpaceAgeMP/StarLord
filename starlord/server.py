@@ -152,7 +152,7 @@ quit
         if not path.exists(LOADADDONS_FILE_SERVER):
             self.updateWorkshopLua()
 
-        args: list[str] = ["./bin/linux64/srcds",
+        args: list[str] = [path.join(self.folder, "bin/linux64/srcds"),
                     "-usercon", "-autoupdate", "-disableluarefresh", "-console", "-allowlocalhttp",
                     "+ip", self.ip, "-port", "%i" % self.port,
                     "-tickrate", "%i" % self.config.tickrate, "-game", "garrysmod", "+maxplayers", "%i" % self.config.maxplayers,
