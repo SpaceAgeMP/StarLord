@@ -176,7 +176,7 @@ quit
         fl = fcntl(self.ptyMaster, F_GETFL)
         _ = fcntl(self.ptyMaster, F_SETFL, fl | O_NONBLOCK)
 
-        self.proc = Popen(args, env=env, bufsize=0, stdin=self.ptySlave, stdout=self.ptySlave, stderr=self.ptySlave, close_fds=True, encoding='utf-8')
+        self.proc = Popen(args, cwd=self.folder, env=env, bufsize=0, stdin=self.ptySlave, stdout=self.ptySlave, stderr=self.ptySlave, close_fds=True, encoding='utf-8')
         self.stdoutThread = Thread(target=self.stdoutThreadFunc, daemon=True, name="Server stdout")
         self.stdoutThread.start()
     
