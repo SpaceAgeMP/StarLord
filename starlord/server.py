@@ -1,6 +1,5 @@
 from os import chdir, path, O_NONBLOCK, read, write, close, getenv, makedirs
 from subprocess import Popen, check_call
-from tempfile import NamedTemporaryFile
 from traceback import print_exc
 from starlord.workshop import getWorkshopItems
 from time import sleep
