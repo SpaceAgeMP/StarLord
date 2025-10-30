@@ -124,7 +124,7 @@ sentry.Setup("%s", {server_name = "%s"})
 @NoPromptForPassword 1
 force_install_dir %s
 login anonymous
-app_update 4020 -beta x86-64
+app_update 4020 -beta x86-64 validate
 quit
 """ % path.abspath(".")
 
