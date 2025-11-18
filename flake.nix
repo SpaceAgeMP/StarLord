@@ -22,7 +22,7 @@
   outputs = { nixpkgs, flake-utils, pyproject-nix, uv2nix, pyproject-build-systems, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs { inherit system; };
+        pkgs = nixpkgs.legacyPackages.${system};
         inherit (pkgs.callPackages pyproject-nix.build.util { }) mkApplication;
 
         overlay = workspace.mkPyprojectOverlay {
