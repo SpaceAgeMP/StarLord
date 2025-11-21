@@ -166,6 +166,8 @@ quit
         env: dict[str, str] = {
             "LD_LIBRARY_PATH": ":".join([path.abspath(p) for p in LD_LIBRARY_PATHS]),
             "HOME": cast(str, getenv("HOME")),
+            "NIX_LD_LIBRARY_PATH": cast(str, getenv("NIX_LD_LIBRARY_PATH")),
+            "NIX_LD": cast(str, getenv("NIX_LD")),
         }
 
         self.kill()
